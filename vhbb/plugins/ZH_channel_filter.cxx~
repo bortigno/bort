@@ -1,0 +1,372 @@
+/* Filter for the ZH channel  */
+/* using the same selection   */
+/* of David dijet in his last */
+/* presentation of December   */
+/* 2010                       */
+/* Events with one Z boosted  */
+/* and at least 2 jets        */
+/* Jet veto at 50             */
+
+/* Version 6                  */
+/* March 2011                 */
+/* Bortignon Pierluigi        */
+
+#include <map>
+#include <string>
+#include <cmath>
+#include <algorithm>
+#include <Math/Functions.h>
+#include <Math/SVector.h>
+#include <Math/SMatrix.h>
+#include "TH1F.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TMath.h"
+#include "TGraphAsymmErrors.h"
+#include "TVector3.h"
+#include "time.h"
+#include "DataFormats/BTauReco/interface/SecondaryVertexTagInfo.h"
+
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/EDFilter.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
+#include "DQMServices/Core/interface/DQMStore.h"
+#include "DQMServices/Core/interface/MonitorElement.h"
+
+#include "SimTracker/TrackHistory/interface/VertexClassifierByProxy.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "DataFormats/Math/interface/Vector.h"
+#include "TROOT.h"
+#include "Math/VectorUtil.h"
+#include <TVector3.h>
+#include "TLorentzVector.h"
+
+#include <Math/GenVector/PxPyPzE4D.h>
+#include <Math/GenVector/PxPyPzM4D.h>
+#include "DataFormats/Math/interface/LorentzVector.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"                                    
+//#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "DataFormats/JetReco/interface/PFJetCollection.h"
+#include "DataFormats/Candidate/interface/CompositeCandidate.h" 
+#include "DataFormats/MuonReco/interface/Muon.h"
+#include "DataFormats/PatCandidates/interface/Muon.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
+
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/PFJetIDSelectionFunctor.h"
+#include "PhysicsTools/SelectorUtils/interface/Selector.h"
+
+#include "PhysicsTools/SelectorUtils/interface/strbitset.h"
+
+#include "DataFormats/GeometryVector/interface/VectorUtil.h"
+#include "DataFormats/PatCandidates/interface/Jet.h"
+#include "CommonTools/CandUtils/interface/AddFourMomenta.h" 
+
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+//
+// class decleration
+//
+// using namespace reco;
+using namespace std;
+using namespace edm;
+
+class ZH_channel_filter : public edm::EDFilter
+{
+  
+public:
+  
+  explicit ZH_channel_filter(const edm::ParameterSet&);
+
+private:
+
+  virtual void beginJob() ;
+  virtual bool filter(edm::Event&, const edm::EventSetup&) ;
+  virtual void endJob() ;
+
+  bool muonJetCleaning( const pat::Jet&, const reco::Candidate*, double );
+
+  struct ComparePt {
+    bool operator()( const reco::Muon t1, const reco::Muon t2 ) const {
+      return t1.p4().pt() > t2.p4().pt();
+    }
+  };
+
+  struct CompareJetPt {
+    bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
+      return j1->p4().Pt() > j2->p4().Pt();
+    }
+  };
+
+  struct CompareBTag {
+    bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
+      return j1->bDiscriminator("combinedSecondaryVertexBJetTags") > j2->bDiscriminator("combinedSecondaryVertexBJetTags");
+    }
+  };
+
+
+  ComparePt ptComparator;
+  CompareJetPt ptJetComparator;
+  CompareBTag BTagComparator;
+
+  //per creare dei TH1 velocemente InputTag.label
+  std::map<std::string,TH1D*> histocontainer_;
+  std::map<std::string,TH2D*> histocontainer_2;
+  std::map<std::string,TH3D*> histocontainer_3;
+
+
+  edm::InputTag muonLabel_;
+  edm::InputTag patJetLabel_;
+  edm::ParameterSet pfJetIdSelector_;
+
+
+  std::vector<const reco::Candidate*> v_muon;
+  std::vector<const reco::Candidate*> v_muon_p;
+  std::vector<const reco::Candidate*> v_muon_n;
+  std::vector<pat::Jet*> v_akt5pfj;
+
+  // Member data
+  Int_t n_event;
+
+  std::vector<unsigned int> cut_ev;
+
+  Double_t muonJetCleaningDRcut;
+  Double_t minBTagging;
+  Double_t maxBTagging;
+  Double_t higgsMassLowerCut;
+  Double_t higgsMassHigherCut;
+  Double_t ZMassLowerCut;
+  Double_t ZMassHigherCut;
+  Double_t ZCandidatePtCut;
+  Double_t higgsCandidatePtCut;
+  Double_t ZH_deltaPhiCut;
+
+  Double_t higgs_pt;
+  Double_t vector_pt;
+  Double_t higgsCandidate_pt;
+
+
+};
+
+ZH_channel_filter::ZH_channel_filter(const edm::ParameterSet& iConfig) : 
+
+  histocontainer_(),
+  histocontainer_2(),
+  histocontainer_3(),
+
+  //cleaning cut
+  muonJetCleaningDRcut(iConfig.getUntrackedParameter<double>("muonJetCleaningDRcut")),
+  ZMassLowerCut(iConfig.getUntrackedParameter<double>("ZMassLowerCut")),
+  ZMassHigherCut(iConfig.getUntrackedParameter<double>("ZMassHigherCut")),
+  minBTagging(iConfig.getUntrackedParameter<double>("minBTagging")),
+  maxBTagging(iConfig.getUntrackedParameter<double>("maxBTagging")),
+  ZCandidatePtCut(iConfig.getUntrackedParameter<double>("ZCandidatePtCut")),
+  higgsCandidatePtCut(iConfig.getUntrackedParameter<double>("higgsCandidatePtCut")),
+  ZH_deltaPhiCut(iConfig.getUntrackedParameter<double>("ZH_deltaPhiCut")),
+
+  //edm collection
+  muonLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonCand")),
+  patJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("patJets")),
+  pfJetIdSelector_(iConfig.getParameter<edm::ParameterSet>("pfJetIDSelector") )
+{
+
+  //Initialize counters
+  n_event = 0;
+  cut_ev.assign(10,0);
+
+}   
+
+bool ZH_channel_filter::filter(edm::Event& iEvent, const edm::EventSetup& setup)
+{
+  ++n_event;
+
+  //all the events counter
+  cut_ev.at(0)++;
+
+  //initialising each events
+  higgs_pt = 0;
+  vector_pt = 0;
+
+  std::cout << "*** Analyzing " << iEvent.id() << " n_event = " << n_event << std::endl << std::endl;
+
+  //patJet
+  edm::Handle< pat::JetCollection > patJetHandle;
+  iEvent.getByLabel(patJetLabel_, patJetHandle);
+  const  pat::JetCollection &patJet = *patJetHandle.product();
+  //JetID. Siggested cuts for 7TeV analysis: LOOSE. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID 
+  //  JetIDSelectionFunctor jetIDFunctor( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::LOOSE );
+  PFJetIDSelectionFunctor pfJetIDFunctor( pfJetIdSelector_ );
+
+  //muon handle
+  //  edm::Handle< edm::View< reco::Muon > > muonHandle;
+  edm::Handle< reco::MuonCollection > muonHandle;
+  iEvent.getByLabel(muonLabel_,muonHandle);
+  //  edm::View<reco::Muon> muons = *muonHandle;
+  const reco::MuonCollection &UnsortedMuons = *muonHandle.product(); 
+  reco::MuonCollection muons = UnsortedMuons;
+  std::sort( muons.begin(), muons.end(), ptComparator);
+
+  v_muon.clear();
+  v_muon_p.clear();
+  v_muon_n.clear();
+  v_akt5pfj.clear();
+
+  // needed for the jetId
+  pat::strbitset ret = pfJetIDFunctor.getBitTemplate();
+
+  // count the good jets
+  goodJetCounter = 0;
+  badJetCounter = 0;
+  
+  // Muon criteria taken from the presentation of Pablo Martinez ETH meeting 9.February.2011
+  for( size_t muon_iter = 0; muon_iter < muons.size(); muon_iter++){
+    const reco::MuonIsolation muIso = muons.at(muon_iter).isolationR03();
+    if( muon::isGoodMuon( muons.at(muon_iter), muon::GlobalMuonPromptTight) and
+	muons.at(muon_iter).isGlobalMuon() == true and
+	muons.at(muon_iter).isTrackerMuon() and
+	muons.at(muon_iter).globalTrack()->pt() > 20 and
+	TMath::Abs(muons.at(muon_iter).globalTrack()->eta()) < 2.4 and
+	muons.at(muon_iter).globalTrack()->ptError()/muons.at(muon_iter).globalTrack()->pt() < 0.1 and 
+// 	muons.at(muon_iter).innerTrack()->numberOfValidPixelHits() > 1 
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->d0(primaryVertex)) < 0.02 and
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->dz(primaryVertex)) < 1 and
+	muons.at(muon_iter).numberOfMatches() > 1 and
+	muons.at(muon_iter).isIsolationValid() == true and
+	muIso.sumPt < 3){
+      if( muons.at(muon_iter).charge() > 0 )
+	v_muon_p.push_back( &( muons.at(muon_iter) ) );
+      else
+	v_muon_n.push_back( &( muons.at(muon_iter) ) );
+    } 
+  }
+  
+  if( v_muon_n.size() < 1
+      or v_muon_p.size() < 1 )
+    return false;
+
+  //after 2 os good muons
+  cut_ev.at(1)++;
+
+  // The jets are pt ordered. unfortunately leptons are considered as akt5pfjet -> need cleaning
+  for(size_t jetIdx = 0; jetIdx < patJet.size(); ++jetIdx){
+    if( patJet.at(jetIdx).isPFJet() == true 
+ 	and pfJetIDFunctor( patJet.at(jetIdx), ret ) == true 
+	and muonJetCleaning( patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
+	and muonJetCleaning( patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false )
+      v_akt5pfj.push_back( new pat::Jet (patJet.at(jetIdx).correctedJet("abs")) );
+  }
+  
+  std::sort(v_akt5pfj.begin(), v_akt5pfj.end(), BTagComparator);
+
+  //Event selection: at least two jets and two muons with opposite sign
+  if( v_akt5pfj.size() < 2 )
+    return false;
+
+  //after 2 good jet
+  cut_ev.at(2)++;
+
+  // Z candidate  
+  v_muon.push_back( v_muon_p.at(0) );
+  v_muon.push_back( v_muon_n.at(0) );  
+  reco::CompositeCandidate Zcandidate;
+  Zcandidate.addDaughter( *v_muon.at(0) );
+  Zcandidate.addDaughter( *v_muon.at(1) );
+  AddFourMomenta addZp4;
+  addZp4.set(Zcandidate);
+  double Zcandidate_pt = Zcandidate.p4().Pt();
+
+  //Z mass cut
+  if( Zcandidate.p4().M() < ZMassLowerCut
+      or Zcandidate.p4().M() > ZMassHigherCut )
+    return false;  
+  //after Z mass region
+  cut_ev.at(3)++;
+
+  // Z pt cut
+  if( Zcandidate_pt < ZCandidatePtCut )
+    return false;
+  //after Z pt cut
+  cut_ev.at(4)++;
+
+  // HIGGS Candidate
+  reco::CompositeCandidate higgsCandidate;
+  higgsCandidate.addDaughter( *v_akt5pfj.at(0) );
+  higgsCandidate.addDaughter( *v_akt5pfj.at(1) );
+  AddFourMomenta addp4;
+  addp4.set(higgsCandidate);
+  higgsCandidate_pt = higgsCandidate.p4().Pt();
+
+  //Higgs pt cut
+  if( higgsCandidate_pt < higgsCandidatePtCut )
+    return false;
+  //after ptH cut
+  cut_ev.at(5)++;
+
+  //after deltaPhi
+  double ZH_deltaPhi = Geom::deltaPhi(higgsCandidate.p4(), Zcandidate.p4());
+  if( TMath::Abs(ZH_deltaPhi) < ZH_deltaPhiCut )
+    return false;
+  //after deltaPhi
+  cut_ev.at(6)++;
+
+  //cut on the looser btag
+  if( ( v_akt5pfj.at(1)->bDiscriminator("combinedSecondaryVertexBJetTags") ) < minBTagging)
+    return false;
+  //after loose btag
+  cut_ev.at(7)++;
+
+  // order jet using pt for the jet veto
+  v_akt5pfj.erase( v_akt5pfj.begin() );
+  v_akt5pfj.erase( v_akt5pfj.begin() );
+  if(v_akt5pfj.size() > 0){
+    std::sort(v_akt5pfj.begin(), v_akt5pfj.end(), ptJetComparator);
+    //JET VETO
+    //no additional akt5pfjets with pt > 50 GeV
+    if( v_akt5pfj.at(0)->p4().pt() > 50 ){
+      return false;
+    }
+  }
+  //after jet veto at 50
+  cut_ev.at(8)++;
+  
+  v_akt5pfj.clear();
+
+  return true;
+  
+}//END EVENT LOOP
+
+
+//puliamo i muoni non isolati
+// if it is true get rid of the muon
+bool ZH_channel_filter::muonJetCleaning( const pat::Jet& patJet, const reco::Candidate* muon, double dRcut){
+  bool clean = false;
+  double dR = 1e10;
+  dR = Geom::deltaR( muon->p4().Vect(), patJet.p4().Vect() );
+  if( dR < dRcut )
+    clean = true;
+  return clean;
+}
+
+
+void ZH_channel_filter::beginJob()
+{
+  
+  using namespace std;
+
+}
+
+void ZH_channel_filter::endJob() {
+
+  std::cout << "JOB FINISHED" << std::endl;
+
+  for(unsigned int i = 0; i < cut_ev.size(); ++i )
+    std::cout << "n of events after cut n " << i << " = " << cut_ev.at(i) << std::endl;
+
+}
+
+DEFINE_FWK_MODULE(ZH_channel_filter);

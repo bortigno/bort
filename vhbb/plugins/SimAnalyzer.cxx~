@@ -1,0 +1,376 @@
+#include <map>
+#include <string>
+#include <cmath>
+#include <algorithm>
+#include <Math/Functions.h>
+#include <Math/SVector.h>
+#include <Math/SMatrix.h>
+#include "TH1F.h"
+#include "TH1D.h"
+#include "TH2D.h"
+#include "TMath.h"
+#include "TGraphAsymmErrors.h"
+#include "TVector3.h"
+#include "time.h"
+#include "DataFormats/BTauReco/interface/SecondaryVertexTagInfo.h"
+
+#include "FWCore/Framework/interface/Frameworkfwd.h"
+#include "FWCore/Framework/interface/EDAnalyzer.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
+
+#include "DQMServices/Core/interface/DQMStore.h"
+#include "DQMServices/Core/interface/MonitorElement.h"
+
+#include "SimTracker/TrackHistory/interface/VertexClassifierByProxy.h"
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+#include "DataFormats/Math/interface/Vector.h"
+#include "TROOT.h"
+#include "Math/VectorUtil.h"
+#include <TVector3.h>
+#include "TLorentzVector.h"
+
+#include <Math/GenVector/PxPyPzE4D.h>
+#include <Math/GenVector/PxPyPzM4D.h>
+#include "DataFormats/Math/interface/LorentzVector.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"                                    
+#include "DataFormats/Math/interface/deltaR.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
+#include "CommonTools/UtilAlgos/interface/TFileService.h"
+//
+// class decleration
+//
+using namespace reco;
+using namespace std;
+using namespace edm;
+
+class SimAnalyzer : public edm::EDAnalyzer
+{
+  
+public:
+  
+  explicit SimAnalyzer(const edm::ParameterSet&);
+
+private:
+  
+  virtual void analyze(const edm::Event&, const edm::EventSetup&);
+  virtual void beginJob() ;
+  virtual void endJob() ;
+
+  //per creare dei TH1 velocemente InputTag.label
+  std::map<std::string,TH1D*> histocontainer_;
+  std::map<std::string,TH2D*> histocontainer_2;
+  std::map<std::string,TH3D*> histocontainer_3;
+
+  edm::InputTag genpLabel_;
+
+  std::vector<int> v_motherId;
+  std::vector<int> v_mother_status_background;
+
+  TLorentzVector TLV_bHadron_general;
+  TLorentzVector TLV_bHadron_signal;
+  TLorentzVector TLV_bHadron_background;
+  std::vector<TLorentzVector> bHadron_general;
+  std::vector<TLorentzVector> bHadron_signal;
+  std::vector<TLorentzVector> bHadron_background;
+
+
+  // Member data
+  Int_t n_event;  
+  Int_t nbs, nbs_signal, nbs_background;
+  Int_t myEvents;
+
+  Double_t higgs_pt;
+  Double_t vector_pt;
+
+  bool bHadron;  
+};
+
+SimAnalyzer::SimAnalyzer(const edm::ParameterSet& iConfig) : 
+
+  histocontainer_(),
+  histocontainer_2(),
+  histocontainer_3(),
+
+  genpLabel_(iConfig.getUntrackedParameter<edm::InputTag>("genPart"))
+
+{
+
+  //Initialize counters
+  n_event = 0;
+  nbs = 0;
+  myEvents = 0;
+
+}   
+
+void SimAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
+{
+  ++n_event;
+
+  //initialising each events
+  nbs = 0;
+  nbs_signal= 0;
+  nbs_background = 0;
+  higgs_pt = 0;
+  vector_pt = 0;
+
+  std::cout << "*** Analyzing " << iEvent.id() << " n_event = " << n_event << std::endl << std::endl;
+
+  // Generated particles handle
+  edm::Handle<edm::View<reco::GenParticle> > genP;
+  iEvent.getByLabel(genpLabel_,genP);
+  edm::View<reco::GenParticle> genParticles = *genP;
+
+  v_motherId.clear();
+  v_mother_status_background.clear();
+  bHadron_general.clear();
+  bHadron_signal.clear();
+  bHadron_background.clear();
+
+  // Generated particles loop
+  for( edm::View<reco::GenParticle>::const_iterator iGenp = genParticles.begin(); 
+       iGenp != genParticles.end();
+       ++iGenp) 
+    {
+
+      //velocizziamo un po tagliando su cose inutili...
+      if( fabs(iGenp->eta()) > 2.5
+	  and iGenp->pt() < 1 )
+	continue;
+    
+      //particleID di genParticle madre e figlie
+      HepPDT::ParticleID particleID( iGenp->pdgId() );
+
+      if( iGenp->numberOfDaughters() ){
+	std::vector<HepPDT::ParticleID> daughterID;
+	for( reco::Candidate::const_iterator iDau = iGenp->begin();
+	     iDau != iGenp->end();
+	     ++iDau )
+	  daughterID.push_back( iDau->pdgId() );
+      }
+      
+      histocontainer_["h_pdgId"]->Fill(iGenp->pdgId());
+      histocontainer_2["h2_pdgId_status"]->Fill(iGenp->pdgId(), iGenp->status());
+      histocontainer_2["h2_pdgId_particleID"]->Fill(iGenp->pdgId(), particleID.pid());
+      
+      // pt of the bosons
+      // 24 e la W+ mentre 23 e la Z. h e 25 
+      if( abs(particleID.pid() == 23) and iGenp->status() == 3 ){
+	vector_pt = iGenp->pt();
+	histocontainer_["h_Z_pt"]->Fill(iGenp->pt());
+      }
+      if( abs(particleID.pid() == 24) and iGenp->status() == 3 ){
+	vector_pt = iGenp->pt();
+// 	std::cout << "W pt = " << vector_pt << std::endl;
+// 	std::cout << "W status = " << iGenp->status() << std::endl;
+	histocontainer_["h_W_pt"]->Fill(iGenp->pt());
+      }
+      if( particleID.pid() == 25 
+	  and ( abs(iGenp->mother()->pdgId()) == 24
+		or abs(iGenp->mother()->pdgId()) == 23 ) ){
+	higgs_pt = iGenp->pt();
+	std::cout << "Higgs mass = " << iGenp->mass() << std::endl;
+	std::cout << "Higgs pt = " << higgs_pt << std::endl;
+	std::cout << "Higgs pdgId = " << iGenp->pdgId() << std::endl;
+	std::cout << "Higgs status = " << iGenp->status() << std::endl;
+	std::cout << "Higgs mother = " << iGenp->mother()->pdgId() << std::endl;
+	histocontainer_["h_H_pt"]->Fill(iGenp->pt());
+	for(size_t myDau = 0; myDau < iGenp->numberOfDaughters(); myDau++){
+	  histocontainer_["h_H_dau_pdgId"]->Fill(iGenp->daughter(myDau)->pdgId());
+	  HepPDT::ParticleID daughter(iGenp->daughter(myDau)->pdgId());
+	  histocontainer_["h_H_dau_hasBottom"]->Fill(daughter.hasBottom());
+	}
+      }
+
+      // saltiamo tutto quello che non e B hadron o b quark
+      if( not particleID.hasBottom() and abs(particleID.pid()) != 5 )
+	continue;
+      nbs++;
+
+      TLV_bHadron_general.SetPtEtaPhiE( iGenp->pt(), iGenp->eta(), iGenp->phi(), iGenp->energy() );
+      bHadron_general.push_back( TLV_bHadron_general );
+      
+      // Higgs. signal
+      if( iGenp->numberOfMothers() ){
+	HepPDT::ParticleID motherID( iGenp->mother()->pdgId() );
+	//std::cout << "mother id = " << iGenp->mother()->pdgId() << std::endl;
+	if( motherID.pid() == 25 ){
+	  std::cout << "signal mother id = " << iGenp->mother()->pdgId() << std::endl;	
+	  std::cout << "signal grandmother id = " << iGenp->mother()->mother()->pdgId() << std::endl;	
+	  std::cout << "signal pdgId = " << iGenp->pdgId() << std::endl;
+	  std::cout << "signal mass = " << iGenp->mass() << std::endl;
+	  std::cout << "signal energy = " << iGenp->energy() << std::endl;
+	  for(size_t myDau = 0; myDau < iGenp->numberOfDaughters(); myDau++){
+	    std::cout << "signal daughter = " << iGenp->daughter(myDau)->pdgId() << std::endl;
+	    for(size_t myGDau = 0; myGDau < iGenp->daughter(myDau)->numberOfDaughters(); myGDau++){
+	      std::cout << "signal grand daughter = " << iGenp->daughter(myDau)->daughter(myGDau)->pdgId() << std::endl;
+	      for(size_t myGGDau = 0; myGGDau < iGenp->daughter(myDau)->daughter(myGDau)->numberOfDaughters(); myGGDau++)
+		std::cout << "signal grand daughter = " << iGenp->daughter(myDau)->daughter(myGDau)->daughter(myGGDau)->pdgId() << std::endl;
+	    }
+	  }
+	  nbs_signal++;
+	  TLV_bHadron_signal.SetPtEtaPhiE( iGenp->pt(), iGenp->eta(), iGenp->phi(), iGenp->energy() );
+	  bHadron_signal.push_back( TLV_bHadron_signal );
+	}
+	// other. background
+	else if( ( particleID.isMeson()
+		   or particleID.isBaryon() )
+		 and particleID.jSpin() < 3 ){
+	  //check if there are dbflavoured daughters
+	  bool myDaughterHasBottom = false;
+	  for(size_t myDau = 0; myDau < iGenp->numberOfDaughters(); myDau++){
+	    HepPDT::ParticleID myDaughter( iGenp->daughter(myDau)->pdgId() ); 
+	    myDaughterHasBottom = myDaughter.hasBottom();
+	  }
+	  if( myDaughterHasBottom == false ){
+	    std::cout << "background id = " << particleID.pid() << std::endl; 
+	    std::cout << "background spin = " << particleID.jSpin() << std::endl; 
+	    nbs_background++;
+	    v_mother_status_background.push_back(iGenp->mother()->status());
+	    TLV_bHadron_background.SetPtEtaPhiE( iGenp->pt(), iGenp->eta(), iGenp->phi(), iGenp->energy() );
+	    bHadron_background.push_back( TLV_bHadron_background );
+	    v_motherId.push_back(motherID.pid());
+	  }
+	}
+      }
+    }//end genparticles loop
+  
+  if( nbs_signal > 1 ){
+    // since the Candidate are pt oderder I take the first two
+    double deltaR_signal =  bHadron_signal.at(0).DeltaR( bHadron_signal.at(1) );
+    TLorentzVector p4sum_signal = bHadron_signal.at(0) + bHadron_signal.at(1);
+    double invmass_signal = p4sum_signal.M();
+    histocontainer_2["h2_ptHiggs_deltaR_signal"]->Fill(higgs_pt, deltaR_signal);
+    if(higgs_pt > 100){
+      std::vector<double> ptb_signal;
+      ptb_signal.push_back( bHadron_signal.at(0).Pt() );
+      ptb_signal.push_back( bHadron_signal.at(1).Pt() );
+      std::sort(ptb_signal.begin(), ptb_signal.end());
+      histocontainer_3["h3_deltaR_ptB1_pt_B2_signal"]->Fill(deltaR_signal, ptb_signal.at(0) , ptb_signal.at(1));
+      histocontainer_["h_deltaR_signal"]->Fill(deltaR_signal);
+      histocontainer_["h_invmass_signal"]->Fill(invmass_signal);
+    }
+  }
+  if( nbs_background > 1 ){
+    double deltaR_background =  bHadron_background.at(0).DeltaR( bHadron_background.at(1) );
+    TLorentzVector p4sum_background = bHadron_background.at(0) + bHadron_background.at(1);
+    double invmass_background = p4sum_background.M();
+    histocontainer_2["h2_ptVector_deltaR_background"]->Fill(vector_pt, deltaR_background);
+    if(vector_pt > 100){
+      std::vector<double> ptb_background;
+      ptb_background.push_back( bHadron_background.at(0).Pt() );
+      ptb_background.push_back( bHadron_background.at(1).Pt() );
+      std::sort(ptb_background.begin(), ptb_background.end());
+      histocontainer_3["h3_deltaR_ptB1_pt_B2_background"]->Fill(deltaR_background, ptb_background.at(0) , ptb_background.at(1));
+      histocontainer_["h_deltaR_background"]->Fill(deltaR_background);
+      histocontainer_["h_invmass_background"]->Fill(invmass_background);
+      //salviamo la provenienza del background
+      std::cout << "status background 1 = " << v_mother_status_background.at(0) << std::endl;
+      std::cout << "status background 2 = " << v_mother_status_background.at(1) << std::endl;
+      histocontainer_2["h2_motherId_background"]->Fill(v_motherId.at(0), v_motherId.at(1));
+    }
+  }
+
+  if(nbs > 1){
+    myEvents++;
+    double deltaR_general =  bHadron_general.at(0).DeltaR( bHadron_general.at(1) );
+    double invmass_general = TMath::Sqrt(bHadron_general.at(0) * bHadron_general.at(1));
+    //all the B hadrons couples
+    std::vector<double> ptb_general;
+    ptb_general.push_back( bHadron_general.at(0).Pt() );
+    ptb_general.push_back( bHadron_general.at(1).Pt() );
+    std::sort(ptb_general.begin(), ptb_general.end());
+    histocontainer_3["h3_deltaR_ptB1_pt_B2_general"]->Fill(deltaR_general, ptb_general.at(0) , ptb_general.at(1));
+    histocontainer_["h_deltaR_general"]->Fill(deltaR_general);
+    histocontainer_["h_invmass_general"]->Fill(invmass_general);
+  }
+  
+}//end events loop
+
+
+
+void SimAnalyzer::beginJob()
+{
+  
+  using namespace std;  
+  edm::Service<TFileService> fs;
+
+
+  //Bool histo
+
+  histocontainer_["h_H_dau_hasBottom"]=fs->make<TH1D>("h_H_dau_hasBottom","h_H_dau_hasBottom",2,0,1);
+
+  Int_t bin_pt = 50;
+  Double_t min_pt = 0;
+  Double_t max_pt = 500;
+
+  histocontainer_["h_Z_pt"]=fs->make<TH1D>("h_Z_pt","p_{t} of Z [GeV/c]", bin_pt, min_pt, max_pt);
+  histocontainer_["h_W_pt"]=fs->make<TH1D>("h_W_pt","p_{t} of W [GeV/c]", bin_pt, min_pt, max_pt);
+  histocontainer_["h_H_pt"]=fs->make<TH1D>("h_H_pt","p_{t} of H [GeV/c]", bin_pt, min_pt, max_pt);
+  
+  Int_t bin_pdgId = 2000;
+  Double_t min_pdgId = -1000;
+  Double_t max_pdgId = 1000;
+
+  histocontainer_["h_pdgId"]=fs->make<TH1D>("h_pdgId","pdgID", bin_pdgId, min_pdgId, max_pdgId);
+  histocontainer_["h_H_dau_pdgId"]=fs->make<TH1D>("h_H_dau_pdgId","h_H_dau_pdgId", bin_pdgId, min_pdgId, max_pdgId);
+  histocontainer_2["h2_pdgId_status"]=fs->make<TH2D>("h2_pdgId_status","pdgID vs status", bin_pdgId, min_pdgId, max_pdgId, 20 , -10 , 10);
+  histocontainer_2["h2_pdgId_particleID"]=fs->make<TH2D>("h2_pdgId_particleID","pdgID vs particleID", bin_pdgId, min_pdgId, max_pdgId, bin_pdgId, min_pdgId, max_pdgId );
+  histocontainer_2["h2_motherId_background"]=fs->make<TH2D>("h2_motherId_background","pdgID", bin_pdgId, min_pdgId, max_pdgId, bin_pdgId, min_pdgId, max_pdgId);
+
+  Int_t bin_deltaR = 200;
+  Double_t min_deltaR = 0;
+  Double_t max_deltaR = 10;
+
+  histocontainer_["h_deltaR_signal"]=fs->make<TH1D>("h_deltaR_signal","deltaR signal (H)", bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_deltaR_background"]=fs->make<TH1D>("h_deltaR_background","deltaR background", bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_deltaR_general"]=fs->make<TH1D>("h_deltaR_general","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
+
+  //redefine the binning on pt
+  bin_pt=100;
+  min_pt=0;
+  max_pt=500;
+
+  histocontainer_2["h2_ptHiggs_deltaR_signal"]=fs->make<TH2D>("h2_ptHiggs_deltaR_signal","h2_ptHiggs_deltaR_signal",
+							      bin_pt, min_pt, max_pt,
+							      bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_2["h2_ptVector_deltaR_background"]=fs->make<TH2D>("h2_ptVector_deltaR_background","h2_ptVector_deltaR_background",
+								   bin_pt, min_pt, max_pt,
+								   bin_deltaR, min_deltaR, max_deltaR);
+
+  histocontainer_3["h3_deltaR_ptB1_pt_B2_general"]=fs->make<TH3D>("h3_deltaR_ptB1_pt_B2_general",
+								 "h3_deltaR_ptB1_pt_B2_general",
+								 bin_deltaR, min_deltaR, max_deltaR,
+								 bin_pt, min_pt, max_pt,
+								 bin_pt, min_pt, max_pt);
+  histocontainer_3["h3_deltaR_ptB1_pt_B2_signal"]=fs->make<TH3D>("h3_deltaR_ptB1_pt_B2_signal",
+								 "h3_deltaR_ptB1_pt_B2_signal",
+								 bin_deltaR, min_deltaR, max_deltaR,
+								 bin_pt, min_pt, max_pt,
+								 bin_pt, min_pt, max_pt);
+  histocontainer_3["h3_deltaR_ptB1_pt_B2_background"]=fs->make<TH3D>("h3_deltaR_ptB1_pt_B2_background",
+								     "h3_deltaR_ptB1_pt_B2_background",
+								     bin_deltaR, min_deltaR, max_deltaR,
+								     bin_pt, min_pt, max_pt,
+								     bin_pt, min_pt, max_pt);  
+
+  Int_t bin_invmass = 600;
+  Double_t min_invmass = 0;
+  Double_t max_invmass = 200;
+
+  histocontainer_["h_invmass_signal"]=fs->make<TH1D>("h_invmass_signal","invmass signal (H)", bin_invmass, min_invmass, max_invmass);
+  histocontainer_["h_invmass_background"]=fs->make<TH1D>("h_invmass_background","invmass background", bin_invmass, min_invmass, max_invmass);
+  histocontainer_["h_invmass_general"]=fs->make<TH1D>("h_invmass_general","invmass general", bin_invmass, min_invmass, max_invmass);
+
+}
+
+void SimAnalyzer::endJob() {
+
+  std::cout << "Number of events with at least two B hadrons = " << myEvents << std::endl;
+  std::cout << "JOB FINISHED" << std::endl;
+
+}
+
+DEFINE_FWK_MODULE(SimAnalyzer);
