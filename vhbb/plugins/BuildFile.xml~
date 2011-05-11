@@ -1,6 +1,6 @@
  <export>
  </export>
- <library   name="PhysicsToolsPatExamples_plugins" file="*.cxx">
+ <library   name="VHbb_iCode_plugins" file="*.cxx, *.cc">
    <use   name="FWCore/Framework"/>
    <use   name="FWCore/ParameterSet"/>
    <use   name="FWCore/MessageLogger"/>
