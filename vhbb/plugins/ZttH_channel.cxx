@@ -1,4 +1,4 @@
-/* ZeeH_channel.cxx analyzer         */
+/* ZttH_channel.cxx analyzer         */
 /* v1 March 2011                   */
 /* Bortignon Pierluigi             */
 /* Same as David :                 */
@@ -62,6 +62,7 @@
 #include "DataFormats/MuonReco/interface/MuonSelectors.h"
 #include "DataFormats/MuonReco/interface/MuonIsolation.h"
 #include "DataFormats/PatCandidates/interface/Electron.h"
+#include "DataFormats/PatCandidates/interface/Tau.h"
 
 #include "DataFormats/PatCandidates/interface/Jet.h"
 #include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
@@ -82,12 +83,12 @@
 using namespace std;
 using namespace edm;
 
-class ZeeH_channel : public edm::EDAnalyzer
+class ZttH_channel : public edm::EDAnalyzer
 {
   
 public:
   
-  explicit ZeeH_channel(const edm::ParameterSet&);
+  explicit ZttH_channel(const edm::ParameterSet&);
 
 private:
   
@@ -97,7 +98,7 @@ private:
 
   inline int getSign(double ); 
   bool muonJetCleaning( const pat::Jet&, const std::vector<reco::Muon>& , double );
-  bool eleJetCleaning( const pat::Jet&, const reco::Candidate*, double );
+  bool tauJetCleaning( const pat::Jet&, const reco::Candidate*, double );
   bool hasHiggsMother( const reco::Candidate* );
   bool hasBdaughters( const reco::Candidate * );
   bool hasBMother( const reco::Candidate * );
@@ -147,6 +148,12 @@ private:
     }
   };
 
+  struct CompareTauPt {
+    bool operator()( const pat::Tau t1, const pat::Tau t2 ) const {
+      return t1.p4().pt() > t2.p4().pt();
+    }
+  };
+
   struct CompareJetPt {
     bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
       return j1->p4().Pt() > j2->p4().Pt();
@@ -160,6 +167,7 @@ private:
   };
 
 
+  CompareTauPt ptTauComparator;
   ComparePt ptComparator;
   CompareEt etComparator;
   CompareJetPt ptJetComparator;
@@ -174,7 +182,8 @@ private:
 
   edm::InputTag akt5pfJetsLabel_;
   edm::InputTag muonLabel_;
-  edm::InputTag electronLabel_;
+  edm::InputTag electronLabel_; 
+  edm::InputTag tauLabel_;
   edm::InputTag genpLabel_;
   edm::InputTag patJetLabel_;
   edm::InputTag ak7patJetLabel_;
@@ -202,7 +211,7 @@ private:
   Int_t n_event;  
   Int_t myEvents;
 
-  Double_t eleJetCleaningDRcut;
+  Double_t tauJetCleaningDRcut;
   Double_t JetBassociationCut;
   Double_t higgsMassLowerCut;
   Double_t higgsMassHigherCut;
@@ -262,7 +271,7 @@ private:
 
 };
 
-ZeeH_channel::ZeeH_channel(const edm::ParameterSet& iConfig) : 
+ZttH_channel::ZttH_channel(const edm::ParameterSet& iConfig) : 
 
   tree_container(),
   histocontainer_(),
@@ -271,7 +280,7 @@ ZeeH_channel::ZeeH_channel(const edm::ParameterSet& iConfig) :
 
   //cleaning cut
   jetDRcut(iConfig.getUntrackedParameter<double>("jetDeltaRcut")),
-  eleJetCleaningDRcut(iConfig.getUntrackedParameter<double>("eleJetCleaningDRcut")),
+  tauJetCleaningDRcut(iConfig.getUntrackedParameter<double>("tauJetCleaningDRcut")),
   JetBassociationCut(iConfig.getUntrackedParameter<double>("JetBassociationDRCut")),
   higgsMassLowerCut(iConfig.getUntrackedParameter<double>("hMassLowerCut")),
   higgsMassHigherCut(iConfig.getUntrackedParameter<double>("hMassHigherCut")),
@@ -286,6 +295,7 @@ ZeeH_channel::ZeeH_channel(const edm::ParameterSet& iConfig) :
   genpLabel_(iConfig.getUntrackedParameter<edm::InputTag>("genPart")),
   muonLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonCand")),
   electronLabel_(iConfig.getUntrackedParameter<edm::InputTag>("electronCand")),
+  tauLabel_(iConfig.getUntrackedParameter<edm::InputTag>("tauCand")),
   //  akt5pfJetsLabel_(iConfig.getUntrackedParameter<edm::InputTag>("akt5pfJets")),
   patJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("patJets")),
   ak7patJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("ak7patJets")),
@@ -300,7 +310,7 @@ ZeeH_channel::ZeeH_channel(const edm::ParameterSet& iConfig) :
 
 }   
 
-void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
+void ZttH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
 {
   ++n_event;
 
@@ -362,6 +372,23 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   std::sort( electrons.begin(), electrons.end(), etComparator);
 
 
+  // read pat::Tau collection (set tauSrc_ in to an edm::InputTag before)
+  edm::Handle<pat::TauCollection> patTau;
+  iEvent.getByLabel(tauLabel_, patTau);
+  const pat::TauCollection &UnsortedTaus = *patTau.product();
+  pat::TauCollection taus = UnsortedTaus;
+  std::sort( taus.begin(), taus.end(), ptTauComparator);
+
+//   // loop over taus
+//   for ( unsigned iTau = 0; iTau < taus.size(); ++iTau ) {
+//     //    pat::TauRef tauCandidate(patTau, iTau);
+//     // check if tau candidate has passed discriminator
+//     if( taus.at(iTau).tauID("byTaNCfrOnePercent") > 0.5 ){
+//       // do something with your candidate
+//       std::cout << "tauCandidate.pt() = " << taus.at(iTau).pt() << std::endl;
+//     }
+//   }
+
   // Generated particles handle
   edm::Handle<reco::GenParticleCollection> genP;
   iEvent.getByLabel(genpLabel_,genP);
@@ -405,9 +432,8 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
     }//END GENPARTICLEs LOOP
 
 
-  std::vector<const reco::Candidate*> v_ele;
-  std::vector<const reco::Candidate*> v_ele_p;
-  std::vector<const reco::Candidate*> v_ele_n;
+  std::vector<const reco::Candidate*> v_muon;
+  std::vector<const reco::Candidate*> v_tau;
   pat::Jet *leadingJet;
   pat::Jet *secondLeadingJet;
   pat::Jet *iJet;
@@ -427,38 +453,50 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   goodJetCounter = 0;
   badJetCounter = 0;
 
-  //store good electrons
-  for( size_t ele_iter = 0; ele_iter < electrons.size(); ++ele_iter )
-    if ( isInFiducial(electrons.at(ele_iter).caloPosition().eta() ) ){
-      v_ele.push_back( &(electrons.at(ele_iter) ) ); 
-      if( electrons.at(ele_iter).charge() > 0 ) 
-	v_ele_p.push_back( &electrons.at(ele_iter) );
-      if( electrons.at(ele_iter).charge() < 0 ) 
-	v_ele_n.push_back( &electrons.at(ele_iter) );
+
+  //store good muons
+  for( size_t muon_iter = 0; muon_iter < muons.size(); muon_iter++){
+    const reco::MuonIsolation muIso = muons.at(muon_iter).isolationR03();
+    if( muon::isGoodMuon( muons.at(muon_iter), muon::GlobalMuonPromptTight) and
+	muons.at(muon_iter).isGlobalMuon() == true and
+	muons.at(muon_iter).isTrackerMuon() and
+	muons.at(muon_iter).globalTrack()->pt() > 20 and
+	TMath::Abs(muons.at(muon_iter).globalTrack()->eta()) < 2.4 and
+	muons.at(muon_iter).globalTrack()->ptError()/muons.at(muon_iter).globalTrack()->pt() < 0.1 and 
+// 	muons.at(muon_iter).  HitPatter::numberOfValidPixelHits() > 1 
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->d0(OfflinePrimaryVertex)) < 0.02 and
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->dz(OfflinePrimaryVertex)) < 1 and
+	muons.at(muon_iter).numberOfMatches() > 1 and
+	muons.at(muon_iter).isIsolationValid() == true and
+	muIso.sumPt < 3 ){
+      v_muon.push_back( &( muons.at(muon_iter) ) );
+    }
+  }
+
+  //store good taus
+  for( size_t tau_iter = 0; tau_iter < taus.size(); ++tau_iter )
+    if ( taus.at(tau_iter).tauID("byTaNCfrOnePercent") > 0.5 ){
+      v_tau.push_back( &(taus.at(tau_iter) ) ); 
     }
   
-  if( v_ele_n.size() < 1
-      or v_ele_p.size() < 1 )
+  if( v_tau.size() < 1
+      or v_muon.size() < 1 )
     return void();
   
   // The jets are pt ordered
   for(size_t jetIdx = 0; jetIdx < patJet.size(); ++jetIdx){
     if( patJet.at(jetIdx).isPFJet() == true 
  	and pfJetIDFunctor( patJet.at(jetIdx), ret ) == true 
-	//	and muonJetCleaning( patJet.at(jetIdx), muons, eleJetCleaningDRcut ) == false
-	and eleJetCleaning( patJet.at(jetIdx), v_ele_p.at(0), eleJetCleaningDRcut ) == false 
-	and eleJetCleaning( patJet.at(jetIdx), v_ele_n.at(0), eleJetCleaningDRcut ) == false )
+	//	and muonJetCleaning( patJet.at(jetIdx), muons, tauJetCleaningDRcut ) == false
+	and tauJetCleaning( patJet.at(jetIdx), v_tau.at(0), tauJetCleaningDRcut ) == false 
+	and tauJetCleaning( patJet.at(jetIdx), v_muon.at(0), tauJetCleaningDRcut ) == false )
       v_akt5pfj.push_back( new pat::Jet (patJet.at(jetIdx).correctedJet("abs")) );  
   }
+  
 
-
-  //Event selection: at least electrons with opposite sign
+  //Event stauction: at least tauctrons with opposite sign
   if( v_akt5pfj.size() < 2 )
     return void();
-
-  //fill the muons for the Z
-  v_ele.push_back( v_ele_p.at(0) );
-  v_ele.push_back( v_ele_n.at(0) );  
 
   // REAL BTAGGING
   //ordering jets using BTagging information
@@ -469,8 +507,8 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
     if( ak7patJet.at(jetIdx).isPFJet() == true 
  	and pfJetIDFunctor( ak7patJet.at(jetIdx), ret ) == true 
 	and ak7patJet.at(jetIdx).correctedJet("abs").pt() > 20
-	and eleJetCleaning( ak7patJet.at(jetIdx), v_ele_p.at(0), eleJetCleaningDRcut ) == false 
-	and eleJetCleaning( ak7patJet.at(jetIdx), v_ele_n.at(0), eleJetCleaningDRcut ) == false ){
+	and tauJetCleaning( ak7patJet.at(jetIdx), v_tau.at(0), tauJetCleaningDRcut ) == false 
+	and tauJetCleaning( ak7patJet.at(jetIdx), v_muon.at(0), tauJetCleaningDRcut ) == false ){
       for( size_t ak5 = 0; ak5 < 2; ak5++ ){
 	if( getDeltaR( &(ak7patJet.at(jetIdx).correctedJet("abs")) , v_akt5pfj.at(ak5) ) < 0.5 )
 	  v_akt7pfj.push_back( new pat::Jet (ak7patJet.at(jetIdx).correctedJet("abs")) );
@@ -531,7 +569,6 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   AddFourMomenta addp4;
   addp4.set(higgsCandidate);
   higgsCandidate_pt = higgsCandidate.p4().Pt();
-  higgsCandidate_mass = higgsCandidate.p4().M();
   TLorentzVector higgsP4;
   higgsP4.SetPtEtaPhiE( higgsCandidate.pt() , 
 			higgsCandidate.eta(),
@@ -541,21 +578,21 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   higgsBoost = higgsP4.BoostVector();
   leading_higgsHelicity = getHelicity( leadingJet, higgsBoost );
   secondLeading_higgsHelicity = getHelicity( secondLeadingJet, higgsBoost );
-
+  higgsCandidate_mass = higgsCandidate.p4().M();
   
   reco::CompositeCandidate Zcandidate;
-  Zcandidate.addDaughter( *v_ele.at(0) );
-  Zcandidate.addDaughter( *v_ele.at(1) );
+  Zcandidate.addDaughter( *v_tau.at(0) );
+  Zcandidate.addDaughter( *v_muon.at(0) );
   AddFourMomenta addZp4;
   addZp4.set(Zcandidate);
   Zcandidate_pt = Zcandidate.p4().Pt();
   Zcandidate_mass = Zcandidate.p4().M();
   double ZH_deltaPhi = Geom::deltaPhi(higgsCandidate.p4(), Zcandidate.p4());
-  TLorentzVector positiveEleP4;
-  positiveEleP4.SetPtEtaPhiE( v_ele_p.at(0)->pt() , 
-			       v_ele_p.at(0)->eta(),
-			       v_ele_p.at(0)->phi(),
-			       v_ele_p.at(0)->energy() );
+  TLorentzVector positiveTauP4;
+  positiveTauP4.SetPtEtaPhiE( v_tau.at(0)->pt() , 
+			       v_tau.at(0)->eta(),
+			       v_tau.at(0)->phi(),
+			       v_tau.at(0)->energy() );
 
   TLorentzVector Zp4;
   Zp4.SetPtEtaPhiE( Zcandidate.pt() , 
@@ -564,7 +601,7 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
 		    Zcandidate.energy() );
   TVector3 Zboost;
   Zboost = Zp4.BoostVector();  
-  Zhelicity = getHelicity( positiveEleP4, Zboost );
+  Zhelicity = getHelicity( positiveTauP4, Zboost );
 
   // order jet using pt for the jet veto
   v_akt5pfj.erase( v_akt5pfj.begin() );
@@ -641,8 +678,8 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   BBdir =  getBBdir( secondLeadingJet, leadingJet );
   
   //plots the leading and second leading separately
-  leadingDeltaTheta = 1e10;
-  secondLeadingDeltaTheta = 1e10;
+  double leadingDeltaTheta = 1e10;
+  double secondLeadingDeltaTheta = 1e10;
   leadingDeltaTheta = TMath::Abs( getDeltaTheta( leadingJet , secondLeadingJet ) );
   secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( secondLeadingJet, leadingJet ) );
   
@@ -652,12 +689,12 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
   TVector2 iT;
   iT = getTvect( iJet );
   double iTheta = 1e10;
-  iDeltaTheta = 1e10;
+  double iDeltaTheta = 1e10;
   iTheta = iT.Phi();
   
   iDeltaTheta = TMath::Abs( getDeltaTheta( iJet , otherJet ) );
 
-  tree_container["Zee_channel"]->Fill();
+  tree_container["Ztt_channel"]->Fill();
 
   myEvents++;
   
@@ -669,11 +706,11 @@ void ZeeH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setu
 
 
 //funzione segno
-inline int ZeeH_channel::getSign(double v) { return v > 0 ? 1 : (v < 0 ? -1 : 0); } 
+inline int ZttH_channel::getSign(double v) { return v > 0 ? 1 : (v < 0 ? -1 : 0); } 
 
 //puliamo i pfjet dai elettroni con un deltaR
 // if it is true get rid of the jet
-bool ZeeH_channel::muonJetCleaning(const pat::Jet& tmpJet, const std::vector<reco::Muon>& muCol, double deltaRcut){
+bool ZttH_channel::muonJetCleaning(const pat::Jet& tmpJet, const std::vector<reco::Muon>& muCol, double deltaRcut){
   bool clean = false;
   double deltaR = 1e10;
   for(size_t muIdx = 0; muIdx < muCol.size(); ++muIdx){
@@ -686,17 +723,17 @@ bool ZeeH_channel::muonJetCleaning(const pat::Jet& tmpJet, const std::vector<rec
 
 //puliamo i elettroni non isolati
 // if it is true get rid of the electrons
-bool ZeeH_channel::eleJetCleaning( const pat::Jet& patJet, const reco::Candidate* ele, double dRcut){
+bool ZttH_channel::tauJetCleaning( const pat::Jet& patJet, const reco::Candidate* tau, double dRcut){
   bool clean = false;
   double dR = 1e10;
-  dR = Geom::deltaR(ele->p4().Vect(), patJet.p4().Vect() );
+  dR = Geom::deltaR(tau->p4().Vect(), patJet.p4().Vect() );
   if( dR < dRcut )
     clean = true;
   return clean;
 }
 
 //metodo per guardare se ha un Higgs come antenato
-bool ZeeH_channel::hasHiggsMother( const reco::Candidate * particle ){
+bool ZttH_channel::hasHiggsMother( const reco::Candidate * particle ){
   bool hashiggsmother = false;
   while ( particle->numberOfMothers() != 0 ){
     if( particle->mother()->pdgId() == 25 )
@@ -707,7 +744,7 @@ bool ZeeH_channel::hasHiggsMother( const reco::Candidate * particle ){
 }
 
 //metodo per guardare se ha un b come antenato
-bool ZeeH_channel::hasBMother( const reco::Candidate * particle ){
+bool ZttH_channel::hasBMother( const reco::Candidate * particle ){
   bool hasBmother = false;
   while ( particle->numberOfMothers() != 0 ){
     if( TMath::Abs(particle->mother()->pdgId()) == 5 )
@@ -718,7 +755,7 @@ bool ZeeH_channel::hasBMother( const reco::Candidate * particle ){
 }
 
 //check if there are dbflavoured daughters
-bool ZeeH_channel::hasBdaughters( const reco::Candidate * particle ){
+bool ZttH_channel::hasBdaughters( const reco::Candidate * particle ){
   bool myDaughterHasBottom = false;
   for(size_t myDau = 0; myDau < particle->numberOfDaughters(); myDau++){
     HepPDT::ParticleID myDaughter( particle->daughter(myDau)->pdgId() ); 
@@ -728,7 +765,7 @@ bool ZeeH_channel::hasBdaughters( const reco::Candidate * particle ){
 }
 
 // calcolo dell'angolo nel piano eta phi della retta conguingente due jet
-double ZeeH_channel::getAnglePhiEtaPlane( pat::Jet *leadingJet , pat::Jet *secondLeadingJet ){
+double ZttH_channel::getAnglePhiEtaPlane( pat::Jet *leadingJet , pat::Jet *secondLeadingJet ){
   double angle = 1e10;
   double deltaPhi = leadingJet->p4().Phi() - secondLeadingJet->p4().Phi();
   double deltaEta = leadingJet->p4().Eta() - secondLeadingJet->p4().Eta();
@@ -737,7 +774,7 @@ double ZeeH_channel::getAnglePhiEtaPlane( pat::Jet *leadingJet , pat::Jet *secon
 }
 
 // calcolo dell'angolo nel piano eta phi della retta conguingente due b hadron
-double ZeeH_channel::getAnglePhiEtaPlane( const reco::Candidate *firstB , const reco::Candidate *secondB ){
+double ZttH_channel::getAnglePhiEtaPlane( const reco::Candidate *firstB , const reco::Candidate *secondB ){
   double angle = 1e10;
   double deltaPhi = firstB->phi() - secondB->phi();
   double deltaEta = firstB->eta() - secondB->eta();
@@ -745,19 +782,19 @@ double ZeeH_channel::getAnglePhiEtaPlane( const reco::Candidate *firstB , const 
   return angle;
 }
 
-double ZeeH_channel::getDeltaR( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
+double ZttH_channel::getDeltaR( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
   double deltaR = 1e10;
   deltaR = Geom::deltaR( leadingJet->p4().Vect(), secondLeadingJet->p4().Vect() );
   return deltaR;
 }
 
-double ZeeH_channel::getDeltaR( const reco::Candidate * firstB, const reco::Candidate * secondB ){
+double ZttH_channel::getDeltaR( const reco::Candidate * firstB, const reco::Candidate * secondB ){
   double deltaR = 1e10;
   deltaR = Geom::deltaR( firstB->momentum(), secondB->momentum() );
   return deltaR;
 }
 
-double ZeeH_channel::getDeltaR( TLorentzVector TLV, pat::Jet * patJet ){
+double ZttH_channel::getDeltaR( TLorentzVector TLV, pat::Jet * patJet ){
   double deltaR = 1e10;
   TVector3 JetVector;
   JetVector.SetXYZ( patJet->p4().Px(), patJet->p4().Py(), patJet->p4().Pz() );
@@ -765,7 +802,7 @@ double ZeeH_channel::getDeltaR( TLorentzVector TLV, pat::Jet * patJet ){
   return deltaR;
 }
 
-double ZeeH_channel::getDeltaR( TVector3 TLV, pat::Jet * patJet ){
+double ZttH_channel::getDeltaR( TVector3 TLV, pat::Jet * patJet ){
   double deltaR = 1e10;
   TVector3 JetVector;
   JetVector.SetXYZ( patJet->p4().Px(), patJet->p4().Py(), patJet->p4().Pz() );
@@ -773,19 +810,19 @@ double ZeeH_channel::getDeltaR( TVector3 TLV, pat::Jet * patJet ){
   return deltaR;
 }
 
-double ZeeH_channel::getDeltaEta( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
+double ZttH_channel::getDeltaEta( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
   double deltaEta = 1e10;
   deltaEta = leadingJet->p4().Eta() - secondLeadingJet->p4().Eta() ;
   return deltaEta;
 }
 
-double ZeeH_channel::getDeltaEta( const reco::Candidate * firstB, const reco::Candidate * secondB ){
+double ZttH_channel::getDeltaEta( const reco::Candidate * firstB, const reco::Candidate * secondB ){
   double deltaEta = 1e10;
   deltaEta = firstB->eta() - secondB->eta() ;
   return deltaEta;
 }
 
-double ZeeH_channel::getDeltaPhi( pat::Jet* leadingJet, pat::Jet* secondLeadingJet){
+double ZttH_channel::getDeltaPhi( pat::Jet* leadingJet, pat::Jet* secondLeadingJet){
 
   double deltaPhi = 1e10;
   deltaPhi = Geom::deltaPhi( leadingJet->p4().Vect(), secondLeadingJet->p4().Vect() ) ;
@@ -793,7 +830,7 @@ double ZeeH_channel::getDeltaPhi( pat::Jet* leadingJet, pat::Jet* secondLeadingJ
 
 }
 
-double ZeeH_channel::getPtAsymmetry(pat::Jet* leadingJet, pat::Jet* secondLeadingJet ){
+double ZttH_channel::getPtAsymmetry(pat::Jet* leadingJet, pat::Jet* secondLeadingJet ){
 
   double asymmetry = 1e10;
   double ptDiff = leadingJet->p4().Pt() - secondLeadingJet->p4().Pt();
@@ -802,7 +839,7 @@ double ZeeH_channel::getPtAsymmetry(pat::Jet* leadingJet, pat::Jet* secondLeadin
   return asymmetry;
 }
 
-unsigned int ZeeH_channel::getAssociatedB( std::vector<TLorentzVector> bHadron_vector, pat::Jet* leadingJet){
+unsigned int ZttH_channel::getAssociatedB( std::vector<TLorentzVector> bHadron_vector, pat::Jet* leadingJet){
 
   //association Bvertex - Jet
   double deltaMin = 1e10;
@@ -819,7 +856,7 @@ unsigned int ZeeH_channel::getAssociatedB( std::vector<TLorentzVector> bHadron_v
 }
 
 
-double ZeeH_channel::getBBavProjection( pat::Jet* j1, pat::Jet* j2 ){
+double ZttH_channel::getBBavProjection( pat::Jet* j1, pat::Jet* j2 ){
 
   TVector2 ci;
   TVector2 r;
@@ -851,7 +888,7 @@ double ZeeH_channel::getBBavProjection( pat::Jet* j1, pat::Jet* j2 ){
 
 // FIXED variabile consigliata nell'articolo teorico sulla color reconnection
 // with bvertex information
-TVector2 ZeeH_channel::getTvect( pat::Jet* patJet, TLorentzVector b ){
+TVector2 ZttH_channel::getTvect( pat::Jet* patJet, TLorentzVector b ){
 
   TVector2 t_Vect(0,0);
   TVector2 ci(0,0);
@@ -879,7 +916,7 @@ TVector2 ZeeH_channel::getTvect( pat::Jet* patJet, TLorentzVector b ){
 }
 
 // without b vertex information
-TVector2 ZeeH_channel::getTvect( pat::Jet* patJet ){
+TVector2 ZttH_channel::getTvect( pat::Jet* patJet ){
 
   TVector2 t_Vect(0,0);
   TVector2 null(0,0);
@@ -926,7 +963,7 @@ TVector2 ZeeH_channel::getTvect( pat::Jet* patJet ){
 }
 
 // with b vertex information
-double ZeeH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZttH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaTheta = 1e10;
   TVector2 v_b1(b1.Eta(), b1.Phi());
@@ -944,7 +981,7 @@ double ZeeH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2, TLorentzVector b
 }
 
 //without b vertex information
-double ZeeH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2 ){
+double ZttH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2 ){
 
   double deltaTheta = 1e10;
   TLorentzVector pi(0,0,0,0);
@@ -994,7 +1031,7 @@ double ZeeH_channel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2 ){
 }
 
 
-double ZeeH_channel::getDeltaX( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZttH_channel::getDeltaX( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaX = 1e10;
   TVector2 v_j1(j1->p4().Eta(), j1->p4().Phi());
@@ -1010,7 +1047,7 @@ double ZeeH_channel::getDeltaX( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, T
 
 }
 
-double ZeeH_channel::getDeltaY( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZttH_channel::getDeltaY( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaY = 1e10;
   TVector2 v_j1(j1->p4().Eta(), j1->p4().Phi());
@@ -1026,7 +1063,7 @@ double ZeeH_channel::getDeltaY( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, T
 
 }
 
-double ZeeH_channel::getMyVar_background( pat::Jet* patJet, TVector3 Bpos ){
+double ZttH_channel::getMyVar_background( pat::Jet* patJet, TVector3 Bpos ){
 
   TVector3 t_vect;
   double patJetTrackPt = 1e10;
@@ -1045,7 +1082,7 @@ double ZeeH_channel::getMyVar_background( pat::Jet* patJet, TVector3 Bpos ){
   return myvar;
 }
 
-double ZeeH_channel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, double BanglePhiEtaPlane ){
+double ZttH_channel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, double BanglePhiEtaPlane ){
 
   TVector3 t_vect;
   double patJetTrackPt = 1e10;
@@ -1070,7 +1107,7 @@ double ZeeH_channel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, double Ba
 }
 
 
-TVector2 ZeeH_channel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
+TVector2 ZttH_channel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
 
   TVector2 BBdir(0,0);
   TLorentzVector pi(0,0,0,0);
@@ -1111,7 +1148,7 @@ TVector2 ZeeH_channel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
 }
 
 // return the jet with the highest |eta|, i.e. the closest to the beam
-inline pat::Jet* ZeeH_channel::whichJet(pat::Jet *j1, pat::Jet *j2){
+inline pat::Jet* ZttH_channel::whichJet(pat::Jet *j1, pat::Jet *j2){
 
   if( TMath::Abs( j1->p4().Eta() ) - TMath::Abs( j2->p4().Eta() ) > 0 )
     return j1;
@@ -1120,7 +1157,7 @@ inline pat::Jet* ZeeH_channel::whichJet(pat::Jet *j1, pat::Jet *j2){
 }
 
 // return the opposite of whichJet
-inline pat::Jet* ZeeH_channel::whichOtherJet(pat::Jet *j1, pat::Jet *j2){
+inline pat::Jet* ZttH_channel::whichOtherJet(pat::Jet *j1, pat::Jet *j2){
 
   if( TMath::Abs( j1->p4().Eta() ) - TMath::Abs( j2->p4().Eta() ) < 0 )
     return j1;
@@ -1129,7 +1166,7 @@ inline pat::Jet* ZeeH_channel::whichOtherJet(pat::Jet *j1, pat::Jet *j2){
 }
 
 
-double ZeeH_channel::getHelicity( pat::Jet* jet , TVector3 boost ){
+double ZttH_channel::getHelicity( pat::Jet* jet , TVector3 boost ){
   double hel = 1e10;
   TLorentzVector j;
   j.SetPtEtaPhiE( jet->pt(), jet->eta(), jet->phi(), jet->energy() );
@@ -1139,7 +1176,7 @@ double ZeeH_channel::getHelicity( pat::Jet* jet , TVector3 boost ){
 }
 
 
-double ZeeH_channel::getHelicity( const reco::GenJet* jet , TVector3 boost ){
+double ZttH_channel::getHelicity( const reco::GenJet* jet , TVector3 boost ){
   double hel = 1e10;
   TLorentzVector j;
   j.SetPtEtaPhiE( jet->pt(), jet->eta(), jet->phi(), jet->energy() );
@@ -1148,7 +1185,7 @@ double ZeeH_channel::getHelicity( const reco::GenJet* jet , TVector3 boost ){
   return hel;
 }
 
-double ZeeH_channel::getHelicity( TLorentzVector b , TVector3 boost ){
+double ZttH_channel::getHelicity( TLorentzVector b , TVector3 boost ){
   double hel = 1e10;
   b.Boost( -boost );
   hel = TMath::Cos( b.Vect().Angle( boost ) );
@@ -1156,7 +1193,7 @@ double ZeeH_channel::getHelicity( TLorentzVector b , TVector3 boost ){
 }
 
 
-bool ZeeH_channel::isInFiducial( double eta ){
+bool ZttH_channel::isInFiducial( double eta ){
   double BarrelMaxEta = 1.4442;
   double EndCapMinEta = 1.56;
   double EndCapMaxEta = 2.5;
@@ -1170,13 +1207,13 @@ bool ZeeH_channel::isInFiducial( double eta ){
 
 
 
-void ZeeH_channel::beginJob()
+void ZttH_channel::beginJob()
 {
   
   using namespace std;  
   edm::Service<TFileService> fs;
 
-  tree_container["Zee_channel"]=fs->make<TTree>("Zee_channel","Zee_channel");
+  tree_container["Ztt_channel"]=fs->make<TTree>("Ztt_channel","Ztt_channel");
 
   abis::make_branch(tree_container,"Zhelicity"                     ,Zhelicity);
   abis::make_branch(tree_container,"higgsCandidate_mass"           ,higgsCandidate_mass);
@@ -1197,11 +1234,11 @@ void ZeeH_channel::beginJob()
 
 }
 
-void ZeeH_channel::endJob() {
+void ZttH_channel::endJob() {
 
   std::cout << "Number of events with at least two B hadrons = " << myEvents << std::endl;
   std::cout << "JOB FINISHED" << std::endl;
 
 }
 
-DEFINE_FWK_MODULE(ZeeH_channel);
+DEFINE_FWK_MODULE(ZttH_channel);

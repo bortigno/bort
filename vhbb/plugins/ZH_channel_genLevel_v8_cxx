@@ -1,13 +1,11 @@
 /* ZH_channel_genLevel.cxx analyzer         */
-/* v9 May 2011                   */
+/* v8 March 2011                   */
 /* Bortignon Pierluigi             */
 /* genLevel cross check            */
 /* No Btagging                     */
 /* No pt cut on the bosons         */
 /* With also parton level          */
-/* NTUPLYZER no more histos        */
 
-#include "VHbb/iCode/interface/abis_func.h"
 #include <map>
 #include <string>
 #include <cmath>
@@ -93,42 +91,39 @@ private:
 
   inline int getSign(double ); 
   bool muonJetCleaning( const pat::Jet&, const std::vector<reco::Muon>&, double );
-  bool muonJetCleaning( const pat::Jet&, const reco::Candidate*, double );
+  bool muonJetCleaning( const pat::Jet&, std::vector<const reco::Candidate*>, double );
   bool hasHiggsMother( const reco::Candidate* );
   bool hasBMother( const reco::Candidate* );
   bool hasBdaughters( const reco::Candidate * );
-  double getAnglePhiEtaPlane( pat::Jet* , pat::Jet* );
+  double getAnglePhiEtaPlane( const pat::Jet* , const pat::Jet* );
   double getAnglePhiEtaPlane( const reco::Candidate* , const reco::Candidate* );
-  double getDeltaR( pat::Jet* , pat::Jet* );
+  double getDeltaR( const pat::Jet* , const pat::Jet* );
   double getDeltaR( const reco::Candidate* , const reco::Candidate* );
-  double getDeltaR( TLorentzVector , pat::Jet* );
-  double getDeltaR( TLorentzVector , const reco::Candidate* );
-  double getDeltaR( const reco::Candidate*, TLorentzVector );
-  double getDeltaR( TVector3 , pat::Jet* );
-  double getDeltaEta( pat::Jet* , pat::Jet* );
+  double getDeltaR( TLorentzVector , const pat::Jet* );
+  double getDeltaR( TVector3 , const pat::Jet* );
+  double getDeltaEta( const pat::Jet* , const pat::Jet* );
   double getDeltaEta( const reco::Candidate* , const reco::Candidate* );
-  double getDeltaPhi( pat::Jet*, pat::Jet* );
-  double getPtAsymmetry(pat::Jet*, pat::Jet* );
+  double getDeltaPhi( const pat::Jet*, const pat::Jet* );
+  double getPtAsymmetry(const pat::Jet*, const pat::Jet* );
   double getPtAsymmetry(const reco::GenJet*, const reco::GenJet* );
-  unsigned int getAssociatedB( std::vector<TLorentzVector> , pat::Jet* );
-  double getBBavProjection( pat::Jet*, pat::Jet* );
-  TVector2 getTvect( pat::Jet*, TLorentzVector );
-  TVector2 getTvect( pat::Jet* );
+  unsigned int getAssociatedB( std::vector<TLorentzVector> , const pat::Jet* );
+  double getBBavProjection( const pat::Jet*, const pat::Jet* );
+  TVector2 getTvect( const pat::Jet*, TLorentzVector );
+  TVector2 getTvect( const pat::Jet* );
   TVector2 getTvect( const reco::GenJet* );
-  double getDeltaTheta( pat::Jet*, pat::Jet*, TLorentzVector, TLorentzVector );
-  double getDeltaTheta( pat::Jet*, pat::Jet* );
+  double getDeltaTheta( const pat::Jet*, const pat::Jet*, TLorentzVector, TLorentzVector );
+  double getDeltaTheta( const pat::Jet*, const pat::Jet* );
   double getDeltaTheta( const reco::GenJet* , const reco::GenJet* );
-  double getDeltaX( pat::Jet*, pat::Jet*, TLorentzVector, TLorentzVector );
-  double getDeltaY( pat::Jet*, pat::Jet*, TLorentzVector, TLorentzVector );
+  double getDeltaX( const pat::Jet*, const pat::Jet*, TLorentzVector, TLorentzVector );
+  double getDeltaY( const pat::Jet*, const pat::Jet*, TLorentzVector, TLorentzVector );
 
-  double getMyVar_background( pat::Jet*, TVector3 );
-  double getMyVar_signal( pat::Jet*, TVector3, double );
+  double getMyVar_background( const pat::Jet*, TVector3 );
+  double getMyVar_signal( const pat::Jet*, TVector3, double );
 
-  TVector2 getBBdir( pat::Jet* , pat::Jet* );
-  inline pat::Jet* whichJet(pat::Jet*, pat::Jet*);
-  inline pat::Jet* whichOtherJet(pat::Jet*, pat::Jet*);
+  TVector2 getBBdir( const pat::Jet* , const pat::Jet* );
+  inline const pat::Jet* whichJet(const pat::Jet*, const pat::Jet*);
+  inline const pat::Jet* whichOtherJet(const pat::Jet*, const pat::Jet*);
 
-  double getHelicity( pat::Jet*, TVector3 );
   double getHelicity( const reco::GenJet*, TVector3 );
   double getHelicity( TLorentzVector, TVector3 );
 
@@ -138,54 +133,14 @@ private:
     }
   };
 
-  struct CompareJetPt {
-    bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
-      return j1->p4().Pt() > j2->p4().Pt();
-    }
-  };
-
-  struct CompareBTag {
-    bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
-      return j1->bDiscriminator("combinedSecondaryVertexBJetTags") > j2->bDiscriminator("combinedSecondaryVertexBJetTags");
-    }
-  };
-
-  struct CompareMCmatching {
-    TLorentzVector genb;
-    bool operator()( pat::Jet* j1, pat::Jet* j2 ) const {
-      return j1->deltaR(genb) < j2->deltaR(genb);
-    }
-  };
-
-
-  struct CompareGenJetPt {
-    bool operator()( reco::GenJet* j1, reco::GenJet* j2 ) const {
-      return j1->p4().Pt() > j2->p4().Pt();
-    }
-  };
-
-//   struct CompareGenBTag {
-//     bool operator()( reco::GenJet* j1, reco::GenJet* j2 ) const {
-//       return j1->bDiscriminator("combinedSecondaryVertexBJetTags") > j2->bDiscriminator("combinedSecondaryVertexBJetTags");
-//     }
-//   };
-
-
   ComparePt ptComparator;
-  CompareJetPt ptJetComparator;
-  CompareBTag btagComparator;
-  CompareGenJetPt ptGenJetComparator;
-
-//   CompareGenBTag genBtagComparator;
 
   //per creare dei TH1 velocemente InputTag.label
-  std::map<std::string,TTree*> tree_container;
   std::map<std::string,TH1D*> histocontainer_;
   std::map<std::string,TH2D*> histocontainer_2;
   std::map<std::string,TH3D*> histocontainer_3;
 
-  edm::InputTag ak5pfJetLabel_;
-  edm::InputTag ak7pfJetLabel_;
+  edm::InputTag akt5pfJetsLabel_;
   edm::InputTag muonLabel_;
   edm::InputTag genpLabel_;
   edm::InputTag genJetsLabel_;
@@ -194,6 +149,8 @@ private:
 
   std::vector<int> v_motherId;
   std::vector<int> v_mother_status_background;
+
+  std::vector<const pat::Jet*> v_akt5pfj;
 
   TLorentzVector TLV_bHadron_general;
   TLorentzVector TLV_bHadron_signal;
@@ -211,8 +168,7 @@ private:
   Int_t n_event;  
   Int_t myEvents;
 
-  Double_t jetPtThreshold;
-  Double_t muonJetCleaningDRcut;
+  Double_t muonJetCleaningDPtcut;
   Double_t JetBassociationCut;
   Double_t higgsMassLowerCut;
   Double_t higgsMassHigherCut;
@@ -245,58 +201,9 @@ private:
   Double_t BdeltaR;
   Double_t JetDeltaR;
 
-  Double_t genb1_pt;
-  Double_t genb1_eta;
-  Double_t genb1_phi;
-  Double_t genb1_energy;
-  Double_t genb2_pt;
-  Double_t genb2_eta;
-  Double_t genb2_phi;
-  Double_t genb2_energy;
-  Double_t genMu1_pt;
-  Double_t genMu1_eta;
-  Double_t genMu1_phi;
-  Double_t genMu1_energy;
-  Double_t genMu2_pt;
-  Double_t genMu2_eta;
-  Double_t genMu2_phi;
-  Double_t genMu2_energy;
-  Double_t recoJet1_pt;
-  Double_t recoJet1_eta;
-  Double_t recoJet1_phi;
-  Double_t recoJet1_energy;
-  Double_t recoJet1_csv;
-  Double_t recoJet2_pt;
-  Double_t recoJet2_eta;
-  Double_t recoJet2_phi;
-  Double_t recoJet2_energy; 
-  Double_t recoJet2_csv;
-  Double_t genHiggs_pt;
-  Double_t genHiggs_eta;
-  Double_t genHiggs_phi;
-  Double_t genHiggs_mass;
-  Double_t genHiggs_helicity;
-  Double_t recoHiggs_pt;
-  Double_t recoHiggs_eta;
-  Double_t recoHiggs_phi;
-  Double_t recoHiggs_mass;
-  Double_t recoHiggs_helicity;
-  Double_t genZ_pt;
-  Double_t genZ_eta;
-  Double_t genZ_phi;
-  Double_t genZ_mass;
-  Double_t genZ_helicity;
-  Double_t recoZ_pt;
-  Double_t recoZ_eta;
-  Double_t recoZ_phi;
-  Double_t recoZ_mass;
-  Double_t recoZ_helicity;
-  Double_t genZH_deltaPhi;
-  Double_t recoZH_deltaPhi;
-
-
   Double_t leadingDeltaTheta;
   Double_t secondLeadingDeltaTheta;
+
 
   Double_t jetDeltaPhi;
   Double_t jetPtAsymmetry;
@@ -304,14 +211,7 @@ private:
   Double_t myVar_background;
   Double_t myVar_signal;
 
-  bool RECO;
   bool bHadron;  
-  bool ak5pfJets_flag;
-  bool ak7pfJets_flag;
-  bool genJets_flag;
-  bool btagOrdering;
-  bool ptOrdering;
-  bool MCmatchingOrdering;
 
   unsigned int different_plane;
   unsigned int same_plane;
@@ -320,23 +220,13 @@ private:
 
 ZH_channel_genLevel::ZH_channel_genLevel(const edm::ParameterSet& iConfig) : 
 
-  tree_container(),
   histocontainer_(),
   histocontainer_2(),
   histocontainer_3(),
 
   //cleaning cut
   jetDRcut(iConfig.getUntrackedParameter<double>("jetDeltaRcut")),
-  jetPtThreshold(iConfig.getUntrackedParameter<double>("jetPtThreshold")),
-  ak5pfJets_flag(iConfig.getUntrackedParameter<bool>("ak5pfJets_flag")),
-  ak7pfJets_flag(iConfig.getUntrackedParameter<bool>("ak7pfJets_flag")),
-  genJets_flag(iConfig.getUntrackedParameter<bool>("genJets_flag")),
-  btagOrdering(iConfig.getUntrackedParameter<bool>("btagOrdering")),
-  ptOrdering(iConfig.getUntrackedParameter<bool>("ptOrdering")),
-  MCmatchingOrdering(iConfig.getUntrackedParameter<bool>("MCmatchingOrdering")),
-  RECO(iConfig.getUntrackedParameter<bool>("RECO")),
-
-  muonJetCleaningDRcut(iConfig.getUntrackedParameter<double>("muonJetCleaningDRcut")),
+  muonJetCleaningDPtcut(iConfig.getUntrackedParameter<double>("muonJetCleaningDPtcut")),
   JetBassociationCut(iConfig.getUntrackedParameter<double>("JetBassociationDRCut")),
   higgsMassLowerCut(iConfig.getUntrackedParameter<double>("hMassLowerCut")),
   higgsMassHigherCut(iConfig.getUntrackedParameter<double>("hMassHigherCut")),
@@ -351,8 +241,8 @@ ZH_channel_genLevel::ZH_channel_genLevel(const edm::ParameterSet& iConfig) :
   genpLabel_(iConfig.getUntrackedParameter<edm::InputTag>("genPart")),
   genJetsLabel_(iConfig.getUntrackedParameter<edm::InputTag>("ak5GenJets")),
   muonLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonCand")),
-  ak5pfJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("ak5pfJets")),
-  ak7pfJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("ak7pfJets")),
+  akt5pfJetsLabel_(iConfig.getUntrackedParameter<edm::InputTag>("akt5pfJets")),
+  patJetLabel_(iConfig.getUntrackedParameter<edm::InputTag>("patJets")),
   pfJetIdSelector_(iConfig.getParameter<edm::ParameterSet>("pfJetIDSelector") )
 {
 
@@ -369,81 +259,18 @@ void ZH_channel_genLevel::analyze(const edm::Event& iEvent, const edm::EventSetu
   ++n_event;
 
   //initialising each events
-  higgs_pt = 1e10;
-  vector_pt = 1e10;
-
-   genb1_pt = 1e10;
-   genb1_eta = 1e10;
-   genb1_phi = 1e10;
-   genb1_energy = 1e10;
-   genb2_pt = 1e10;
-   genb2_eta = 1e10;
-   genb2_phi = 1e10;
-   genb2_energy = 1e10;
-   genMu1_pt = 1e10;
-   genMu1_eta = 1e10;
-   genMu1_phi = 1e10;
-   genMu1_energy = 1e10;
-   genMu2_pt = 1e10;
-   genMu2_eta = 1e10;
-   genMu2_phi = 1e10;
-   genMu2_energy = 1e10;
-   recoJet1_pt = 1e10;
-   recoJet1_eta = 1e10;
-   recoJet1_phi = 1e10;
-   recoJet1_energy = 1e10;
-   recoJet1_csv = 1e10;
-   recoJet2_pt = 1e10;
-   recoJet2_eta = 1e10;
-   recoJet2_phi = 1e10;
-   recoJet2_energy = 1e10;
-   recoJet2_csv = 1e10;
-  genHiggs_pt = 1e10;
-  genHiggs_eta = 1e10;
-  genHiggs_phi = 1e10;
-  genHiggs_mass = 1e10;
-  genHiggs_helicity = 1e10;
-  recoHiggs_pt = 1e10;
-  recoHiggs_eta = 1e10;
-  recoHiggs_phi = 1e10;
-  recoHiggs_mass = 1e10;
-  recoHiggs_helicity = 1e10;
-  genZ_pt = 1e10;
-  genZ_eta = 1e10;
-  genZ_phi = 1e10;
-  genZ_mass = 1e10;
-  genZ_helicity = 1e10;
-  recoZ_pt = 1e10;
-  recoZ_eta = 1e10;
-  recoZ_phi = 1e10;
-  recoZ_mass = 1e10;
-  recoZ_helicity = 1e10;
-  genZH_deltaPhi = 1e10;
-  recoZH_deltaPhi = 1e10;
-  leadingDeltaTheta = 1e10;
-  secondLeadingDeltaTheta = 1e10;
+  higgs_pt = 0;
+  vector_pt = 0;
 
   std::cout << "*** Analyzing " << iEvent.id() << " n_event = " << n_event << std::endl << std::endl;
 
-  //ak5patJet
-  edm::Handle< pat::JetCollection > ak5patJetHandle;
-  iEvent.getByLabel(ak5pfJetLabel_, ak5patJetHandle);
-  const  pat::JetCollection &ak5patJet = *ak5patJetHandle.product();
+  //patJet
+  edm::Handle< pat::JetCollection > patJetHandle;
+  iEvent.getByLabel(patJetLabel_, patJetHandle);
+  const  pat::JetCollection &patJet = *patJetHandle.product();
   //JetID. Siggested cuts for 7TeV analysis: LOOSE. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID 
   //  JetIDSelectionFunctor jetIDFunctor( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::LOOSE );
-  PFJetIDSelectionFunctor ak5pfJetIDFunctor( pfJetIdSelector_ );
-  // needed for the jetId
-  pat::strbitset ak5ret = ak5pfJetIDFunctor.getBitTemplate();
-
-  //ak7patJet
-  edm::Handle< pat::JetCollection > ak7patJetHandle;
-  iEvent.getByLabel(ak7pfJetLabel_, ak7patJetHandle);
-  const  pat::JetCollection &ak7patJet = *ak7patJetHandle.product();
-  //JetID. Siggested cuts for 7TeV analysis: LOOSE. https://twiki.cern.ch/twiki/bin/viewauth/CMS/JetID 
-  //  JetIDSelectionFunctor jetIDFunctor( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::LOOSE );
-  PFJetIDSelectionFunctor ak7pfJetIDFunctor( pfJetIdSelector_ );
-  // needed for the jetId
-  pat::strbitset ak7ret = ak7pfJetIDFunctor.getBitTemplate();
+  PFJetIDSelectionFunctor pfJetIDFunctor( pfJetIdSelector_ );
 
   //muon handle
   //  edm::Handle< edm::View< reco::Muon > > muonHandle;
@@ -470,22 +297,16 @@ void ZH_channel_genLevel::analyze(const edm::Event& iEvent, const edm::EventSetu
   bHadron_general.clear();
   bHadron_signal.clear();
   bHadron_background.clear();
+  v_akt5pfj.clear();
 
   std::vector<const reco::Candidate*> v_muon;
   std::vector<const reco::Candidate*> v_muon_p;
   std::vector<const reco::Candidate*> v_muon_n;
   TLorentzVector genHiggs;
-  TLorentzVector genZ;
   TLorentzVector genb1;
   TLorentzVector genb2;
-  TLorentzVector genMu1;
-  TLorentzVector genMu2;
-
-  pat::Jet* leadingJet;
-  pat::Jet* secondLeadingJet;
 
   unsigned int bcount = 0;
-  unsigned int mucount = 0;
   int b1_mother = 0;
   int b2_mother = 0;
 
@@ -502,9 +323,10 @@ void ZH_channel_genLevel::analyze(const edm::Event& iEvent, const edm::EventSetu
 // 			       genCandidate->eta(),
 // 			       genCandidate->phi(),
 // 			       genCandidate->energy() );
+
       if( ( genCandidate->pdgId() == 5 )
 	  //21 = gluon; 25 = higgs
- 	  and ( genCandidate->mother()->pdgId() == 25 )
+// 	  and ( genCandidate->mother()->pdgId() == 21 )
 	  and ( not hasBMother(genCandidate) ) ){
 	genb1.SetPtEtaPhiE( genCandidate->pt(),
 			    genCandidate->eta(),
@@ -512,286 +334,156 @@ void ZH_channel_genLevel::analyze(const edm::Event& iEvent, const edm::EventSetu
 			    genCandidate->energy() );
 	bcount++;
 	b1_mother = genCandidate->mother()->pdgId();
+	std::cout << "b1 pdgId = " << genCandidate->pdgId() << "; b1 mother = " << b1_mother << std::endl;
       }
       else if( ( genCandidate->pdgId() == -5 )
-	       //21 = gluon; 25 = higgs
-	       and ( genCandidate->mother()->pdgId() == 25 )
-	       and ( not hasBMother(genCandidate) ) ){
+	  //21 = gluon; 25 = higgs
+// 	  and ( genCandidate->mother()->pdgId() == 21 )
+	  and ( not hasBMother(genCandidate) ) ){
 	genb2.SetPtEtaPhiE( genCandidate->pt(),
 			    genCandidate->eta(),
 			    genCandidate->phi(),
 			    genCandidate->energy() );
 	bcount++;
 	b2_mother = genCandidate->mother()->pdgId();
-      }
-
-      else if( ( genCandidate->pdgId() == 13 )
-	       and ( genCandidate->mother()->pdgId() == 23 ) ){
-	genMu1.SetPtEtaPhiE( genCandidate->pt(),
-			     genCandidate->eta(),
-			     genCandidate->phi(),
-			     genCandidate->energy() );
-	mucount++;
-      }
-      else if( ( genCandidate->pdgId() == -13 )
-	       and ( genCandidate->mother()->pdgId() == 23 ) ){
-	genMu2.SetPtEtaPhiE( genCandidate->pt(),
-			     genCandidate->eta(),
-			     genCandidate->phi(),
-			     genCandidate->energy() );
-	mucount++;
+	std::cout << "b2 pdgId = " << genCandidate->pdgId() << "; b2 mother = " << b2_mother << std::endl;
       }
       
     }//END GENPARTICLEs LOOP
   
-  if( bcount > 1 
-      and mucount > 1 ){
+  if( bcount > 1 ){
     genHiggs = genb1 + genb2;
-    genb1_pt =  genb1.Pt();
-    genb1_phi =  genb1.Phi();
-    genb1_eta =  genb1.Eta();
-    genb1_energy = genb1.Energy();
-    genb2_pt =  genb2.Pt();
-    genb2_phi =  genb2.Phi();
-    genb2_eta =  genb2.Eta();
-    genb2_energy = genb2.Energy();
-    genHiggs_pt =  genHiggs.Pt();
-    genHiggs_phi =  genHiggs.Phi();
-    genHiggs_eta =  genHiggs.Eta();
-    genHiggs_mass = genHiggs.M();
-    TVector3 genHiggsBoost;
-    genHiggsBoost = genHiggs.BoostVector();
-    if( genb1.Pt() > genb2.Pt() )
-      genHiggs_helicity =  getHelicity( genb1, genHiggsBoost );
-    else 
-      genHiggs_helicity =  getHelicity( genb2, genHiggsBoost );
-
-    genZ = genMu1 + genMu2;
-    genMu1_pt =  genMu1.Pt();
-    genMu1_phi =  genMu1.Phi();
-    genMu1_eta =  genMu1.Eta();
-    genMu1_energy = genMu1.Energy();
-    genMu2_pt =  genMu2.Pt();
-    genMu2_phi =  genMu2.Phi();
-    genMu2_eta =  genMu2.Eta();
-    genMu2_energy = genMu2.Energy();
-    genZ_pt =  genZ.Pt();
-    genZ_eta =  genZ.Eta();
-    genZ_phi =  genZ.Phi();
-    genZ_mass = genZ.M();
-    genZH_deltaPhi = Geom::deltaPhi(genHiggs.Vect().Phi(), genZ.Vect().Phi());
-    TVector3 genZBoost;
-    genZBoost = genZ.BoostVector();
-    if( genMu1.Pt() > genMu2.Pt() )
-      genZ_helicity =  getHelicity( genMu1, genZBoost );
-    else 
-      genZ_helicity =  getHelicity( genMu2, genZBoost );
+    if( genHiggs.Pt() > 155 and 
+	( genHiggs.M() > 100 and genHiggs.M() < 140) ){
+      TVector3 genHiggsBoost;
+      genHiggsBoost = genHiggs.BoostVector();
+      double genb1_higgsHelicity = getHelicity( genb1, genHiggsBoost );
+      double genb2_higgsHelicity = getHelicity( genb2, genHiggsBoost );
+      double bPtAsymmetry = ( genb1.Pt() - genb2.Pt() ) / ( genb1.Pt() + genb2.Pt() );
+      if( genb1.Pt() > genb2.Pt() )
+	histocontainer_2["h2_parton_helicity_ptAsymm"]->Fill( genb1_higgsHelicity, bPtAsymmetry );
+      else
+	histocontainer_2["h2_parton_helicity_ptAsymm"]->Fill( genb2_higgsHelicity, - bPtAsymmetry );
+      if( TMath::Abs(bPtAsymmetry) < 1e-5 ){
+	std::cout << "b1 mother = " << b1_mother << "; b2 mother = " << b2_mother << std::endl;
+      }
+    }
   }
-  else
+
+
+  //muon selection
+  for( size_t muon_iter = 0; muon_iter < muons.size(); muon_iter++){
+    const reco::MuonIsolation muIso = muons.at(muon_iter).isolationR03();
+    if( muon::isGoodMuon( muons.at(muon_iter), muon::GlobalMuonPromptTight) and
+	muons.at(muon_iter).isGlobalMuon() == true and
+	muons.at(muon_iter).isTrackerMuon() and
+	muons.at(muon_iter).globalTrack()->pt() > 20 and
+	TMath::Abs(muons.at(muon_iter).globalTrack()->eta()) < 2.4 and
+	muons.at(muon_iter).globalTrack()->ptError()/muons.at(muon_iter).globalTrack()->pt() < 0.1 and 
+// 	muons.at(muon_iter).  HitPatter::numberOfValidPixelHits() > 1 
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->d0(OfflinePrimaryVertex)) < 0.02 and
+// 	TMath::Abs(muons.at(muon_iter).globalTrack()->dz(OfflinePrimaryVertex)) < 1 and
+	muons.at(muon_iter).numberOfMatches() > 1 and
+	muons.at(muon_iter).isIsolationValid() == true and
+	muIso.sumPt < 3 ){
+      if( muons.at(muon_iter).charge() == 1 )
+	v_muon_p.push_back( &( muons.at(muon_iter) ) );
+      else
+	v_muon_n.push_back( &( muons.at(muon_iter) ) );
+    } 
+  }
+
+  //Event selection: at least two jets and two muons with opposite sign
+  if( genJ.size() < 2
+      or v_muon_n.size() < 1
+      or v_muon_p.size() < 1 )
     return void();
+
+  v_muon.push_back( v_muon_p.at(0) );
+  v_muon.push_back( v_muon_n.at(0) );  
+
+  // MC TRUTH JETS
+  const reco::GenJet *leadingGenJet;
+  const reco::GenJet *secondLeadingGenJet;
+
+  leadingGenJet = &genJ.at(0);
+  secondLeadingGenJet= &genJ.at(1);
+//   std::cout << "leading pt = " <<  leadingGenJet->p4().Pt() << std::endl;
+//   std::cout << "second leading pt = " <<  secondLeadingGenJet->p4().Pt() << std::endl;
+
+  reco::CompositeCandidate higgsCandidate;
+  higgsCandidate.addDaughter( *leadingGenJet );
+  higgsCandidate.addDaughter( *secondLeadingGenJet );
+  AddFourMomenta addp4;
+  addp4.set(higgsCandidate);
+  higgsCandidate_pt = higgsCandidate.p4().Pt();
+  TLorentzVector higgsP4;
+  higgsP4.SetPtEtaPhiE( higgsCandidate.pt() , 
+			higgsCandidate.eta(),
+			higgsCandidate.phi(),
+			higgsCandidate.energy() );
+  TVector3 higgsBoost;
+  higgsBoost = higgsP4.BoostVector();
+  double leading_higgsHelicity = getHelicity( leadingGenJet, higgsBoost );
+  double secondLeading_higgsHelicity = getHelicity( secondLeadingGenJet, higgsBoost );
+
+  reco::CompositeCandidate Zcandidate;
+  Zcandidate.addDaughter( *v_muon.at(0) );
+  Zcandidate.addDaughter( *v_muon.at(1) );
+  AddFourMomenta addZp4;
+  addZp4.set(Zcandidate);
+  double Zcandidate_pt = Zcandidate.p4().Pt();
+  double ZH_deltaPhi = Geom::deltaPhi(higgsCandidate.p4(), Zcandidate.p4());
+
+  histocontainer_["h_higgsCandidate_pt"]->Fill( higgsCandidate_pt );
+  histocontainer_["h_higgsCandidate_mass"]->Fill( higgsCandidate.p4().M() );
+  histocontainer_["h_Zcandidate_pt"]->Fill( Zcandidate_pt );
+  histocontainer_["h_Zcandidate_mass"]->Fill( Zcandidate.p4().M() );
+  histocontainer_["h_HZ_deltaPhi"]->Fill( ZH_deltaPhi );
+
+// Event selection
+  if( Zcandidate_pt < ZCandidatePtCut
+      or TMath::Abs(ZH_deltaPhi) < ZH_deltaPhiCut
+      or Zcandidate.p4().M() < 75
+      or Zcandidate.p4().M() > 105 
+      or higgsCandidate_pt < HCandidatePtCut )
+    return void();  
+
+  // taglio sulla finestra di massa dell'higgs
+  if( higgsCandidate.p4().M() < higgsMassLowerCut or
+      higgsCandidate.p4().M() > higgsMassHigherCut )
+    return void();
+
+  jetPtAsymmetry = getPtAsymmetry( leadingGenJet, secondLeadingGenJet );
+
+  histocontainer_2["h2_helicity_ptAsymm"]->Fill( leading_higgsHelicity, jetPtAsymmetry );
+//   histocontainer_2["h2_helicity_ptAsymm"]->Fill( secondLeading_higgsHelicity, jetPtAsymmetry );
   
-
-  //   if( genJets_flag == true ){
-  //     std::vector<reco::GenJet*> v_jets;
-  //     // MC TRUTH JETS
-  //     for(size_t jetIdx = 0; jetIdx < genJ.size(); ++jetIdx){
-  //       if( genJ.at(jetIdx).p4().Pt() > jetPtThreshold )
-  // 	v_jets.push_back( new reco::GenJet (genJ.at(jetIdx)) );
-  //     }
-  //   }
-//   else{
-//     std::cout << "No jet collection found..." << std::endl;
-//     return void();
-//   }
-  
-//   if( v_jets.size() < 2 )
-//     return void();
-  
-  //   if( genJets_flag == true ){
-  //     if( btagOrdering == true )
-  //       std::sort(v_jets.begin(), v_jets.end(), genBtagComparator);
-  //     else if( ptOrdering == true )
-  //       std::sort(v_jets.begin(), v_jets.end(), ptGenJetComparator);
-  //     //  else if( pullOrdering ) //to do
-  //     else{
-  //       std::cout << "No jet ordering found..." << std::endl; 
-  //       return void();
-  //     }
-  //   }
-  
-
-  //for the reconstructed quantities
-  if(RECO == true){
-
-    //muon selection
-    for( size_t muon_iter = 0; muon_iter < muons.size(); muon_iter++){
-      const reco::MuonIsolation muIso = muons.at(muon_iter).isolationR03();
-      if( muon::isGoodMuon( muons.at(muon_iter), muon::GlobalMuonPromptTight) and
-	  muons.at(muon_iter).isGlobalMuon() == true and
-	  muons.at(muon_iter).isTrackerMuon() and
-	  muons.at(muon_iter).globalTrack()->pt() > 20 and
-	  TMath::Abs(muons.at(muon_iter).globalTrack()->eta()) < 2.4 and
-	  muons.at(muon_iter).globalTrack()->ptError()/muons.at(muon_iter).globalTrack()->pt() < 0.1 and 
-	  // 	muons.at(muon_iter).  HitPatter::numberOfValidPixelHits() > 1 
-	  // 	TMath::Abs(muons.at(muon_iter).globalTrack()->d0(OfflinePrimaryVertex)) < 0.02 and
-	  // 	TMath::Abs(muons.at(muon_iter).globalTrack()->dz(OfflinePrimaryVertex)) < 1 and
-	  muons.at(muon_iter).numberOfMatches() > 1 and
-	  muons.at(muon_iter).isIsolationValid() == true and
-	  muIso.sumPt < 3 ){
-	if( muons.at(muon_iter).charge() == 1 )
-	  v_muon_p.push_back( &( muons.at(muon_iter) ) );
-	else
-	  v_muon_n.push_back( &( muons.at(muon_iter) ) );
-      } 
-    }
-
-    //Event selection: at least two jets and two muons with opposite sign
-    if(  v_muon_n.size() < 1
-	 or v_muon_p.size() < 1 )
-      return void();
-
-    v_muon.push_back( v_muon_p.at(0) );
-    v_muon.push_back( v_muon_n.at(0) );  
-
-    //    std::cout << "ak5pfJets_flag = " << ak5pfJets_flag << std::endl;
-    std::vector<pat::Jet*> v_jets;
-    if( ak5pfJets_flag == true ){
-      //AK5PF
-      for(size_t jetIdx = 0; jetIdx < ak5patJet.size(); ++jetIdx){
-	if( ak5patJet.at(jetIdx).isPFJet() == true 
-	    and ak5pfJetIDFunctor( ak5patJet.at(jetIdx), ak5ret ) == true 
-	    and ak5patJet.at(jetIdx).correctedJet("L3Absolute").pt() > jetPtThreshold
-	    and muonJetCleaning( ak5patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
-	    and muonJetCleaning( ak5patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false )
-	  v_jets.push_back( new pat::Jet (ak5patJet.at(jetIdx).correctedJet("L3Absolute")) );
-      }  
-    }
-    else if( ak7pfJets_flag == true ){
-      //AK7PF
-      for(size_t jetIdx = 0; jetIdx < ak7patJet.size(); ++jetIdx){
-	if( ak7patJet.at(jetIdx).isPFJet() == true 
-	    and ak7pfJetIDFunctor( ak7patJet.at(jetIdx), ak7ret ) == true 
-	    and ak7patJet.at(jetIdx).correctedJet("L3Absolute").pt() > jetPtThreshold
-	    and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
-	    and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false )
-	  v_jets.push_back( new pat::Jet (ak7patJet.at(jetIdx).correctedJet("L3Absolute")) );
-      }  
-    }
-    else{
-      std::cout << "No jet collection found..." << std::endl;
-      return void();
-    }
-
-    if( v_jets.size() < 2 )
-      return void();
-
-    if( btagOrdering == true )
-      std::sort(v_jets.begin(), v_jets.end(), btagComparator);
-    else if( ptOrdering == true )
-      std::sort(v_jets.begin(), v_jets.end(), ptJetComparator);
-    else if( MCmatchingOrdering == true ){
-      CompareMCmatching MCmatchingComparator;
-      MCmatchingComparator.genb = genb1;
-      std::sort(v_jets.begin(), v_jets.end(), MCmatchingComparator );
-      MCmatchingComparator.genb = genb2;
-      std::sort(v_jets.begin()+1, v_jets.end(), MCmatchingComparator );
-    }
-    else{
-      std::cout << "No jet ordering found..." << std::endl; 
-      return void();
-    }
-    //  else if( pullOrdering ) //to do
-
-    if( v_jets.at(0)->p4().Pt() > v_jets.at(1)->p4().Pt() ){
-      leadingJet = v_jets.at(0);
-      secondLeadingJet = v_jets.at(1);
-    }
-    else{
-      leadingJet = v_jets.at(1);
-      secondLeadingJet = v_jets.at(0);
-    }
-
-    //gen-reco associationA
-    if( getDeltaR(v_muon_p.at(0), genMu2) > 0.5
-	or getDeltaR(v_muon_n.at(0), genMu1) > 0.5
-	or ( getDeltaR(v_jets.at(0), genb1) > 0.5
-	     and getDeltaR(v_jets.at(1), genb1) > 0.5 )
-	or ( getDeltaR(v_jets.at(0), genb2) > 0.5
-	     and getDeltaR(v_jets.at(1), genb2) > 0.5 ) )
-      return void();
-
-    recoJet1_pt =  v_jets.at(0)->p4().Pt();
-    recoJet1_phi =  v_jets.at(0)->p4().Phi();
-    recoJet1_eta =  v_jets.at(0)->p4().Eta();
-    recoJet1_energy = v_jets.at(0)->p4().E();
-    recoJet1_csv = v_jets.at(0)->bDiscriminator("combinedSecondaryVertexBJetTags");
-    recoJet2_pt =  v_jets.at(1)->p4().Pt();
-    recoJet2_phi =  v_jets.at(1)->p4().Phi();
-    recoJet2_eta =  v_jets.at(1)->p4().Eta();
-    recoJet2_energy =  v_jets.at(1)->p4().E();
-    recoJet2_csv = v_jets.at(1)->bDiscriminator("combinedSecondaryVertexBJetTags");
-
-    //EWK
-    reco::CompositeCandidate Zcandidate;
-    Zcandidate.addDaughter( *v_muon.at(0) );
-    Zcandidate.addDaughter( *v_muon.at(1) );
-    AddFourMomenta addZp4;
-    addZp4.set(Zcandidate);
-    recoZ_pt = Zcandidate.p4().Pt();
-    recoZ_eta = Zcandidate.p4().Eta();
-    recoZ_phi = Zcandidate.p4().Phi();
-    recoZ_mass = Zcandidate.p4().M();  
-    TLorentzVector ZP4;
-    ZP4.SetPtEtaPhiE( Zcandidate.pt() , 
-		      Zcandidate.eta(),
-		      Zcandidate.phi(),
-		      Zcandidate.energy() );
-    TVector3 ZBoost;
-    ZBoost = ZP4.BoostVector();
-    TLorentzVector Mu;
-    Mu.SetPtEtaPhiE( v_muon.at(0)->p4().Pt(), 
-		     v_muon.at(0)->p4().Eta(), 
-		     v_muon.at(0)->p4().Phi(), 
-		     v_muon.at(0)->p4().E() );
-    recoZ_helicity = getHelicity( Mu , ZBoost );
-    
-    reco::CompositeCandidate higgsCandidate;
-    higgsCandidate.addDaughter( *v_jets.at(0) );
-    higgsCandidate.addDaughter( *v_jets.at(1) );
-    AddFourMomenta addp4;
-    addp4.set(higgsCandidate);
-    recoHiggs_pt = higgsCandidate.p4().Pt();
-    recoHiggs_eta = higgsCandidate.p4().Eta();
-    recoHiggs_phi = higgsCandidate.p4().Phi();
-    recoHiggs_mass = higgsCandidate.p4().M();
-    TLorentzVector higgsP4;
-    higgsP4.SetPtEtaPhiE( higgsCandidate.pt() , 
-			  higgsCandidate.eta(),
-			  higgsCandidate.phi(),
-			  higgsCandidate.energy() );
-    TVector3 higgsBoost;
-    higgsBoost = higgsP4.BoostVector();
-    recoHiggs_helicity = getHelicity( leadingJet, higgsBoost );
-
-    recoZH_deltaPhi = Geom::deltaPhi(higgsCandidate.p4(), Zcandidate.p4());
-
-    TVector2 secondLeadingT;
-    TVector2 leadingT;
-    secondLeadingT = getTvect(secondLeadingJet);
-    leadingT = getTvect(leadingJet);
-    if(secondLeadingT.Mod() < 1e-7 
-       or leadingT.Mod() < 1e-7 )
-      return void();
-    leadingDeltaTheta = TMath::Abs( getDeltaTheta( leadingJet , secondLeadingJet ) );
-    secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( secondLeadingJet, leadingJet ) );
-
-    v_jets.clear(); 
-  }
-
-
-  tree_container["ZMuMu_channel"]->Fill();   
+  TVector2 secondLeadingT;
+  TVector2 leadingT;
+  secondLeadingT = getTvect(secondLeadingGenJet);
+  leadingT = getTvect(leadingGenJet);
+  if(secondLeadingT.Mod() < 1e-7 
+     or leadingT.Mod() < 1e-7 )
+    return void();
+  double leadingDeltaTheta = 1e10;
+  double secondLeadingDeltaTheta = 1e10;
+  leadingDeltaTheta = TMath::Abs( getDeltaTheta( leadingGenJet , secondLeadingGenJet ) );
+  secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( secondLeadingGenJet, leadingGenJet ) );
+   
+  //plots the leading and second leading separately
+  histocontainer_["h_LowerDeltaTheta"]->Fill( secondLeadingDeltaTheta );
+  histocontainer_["h_HigherDeltaTheta"]->Fill( leadingDeltaTheta ); 
+  histocontainer_["h_AllDeltaTheta"]->Fill( secondLeadingDeltaTheta );
+  histocontainer_["h_AllDeltaTheta"]->Fill( leadingDeltaTheta );
+  histocontainer_2["h2_HigherDeltaTheta_LowerDeltaTheta"]->Fill(TMath::Abs(leadingDeltaTheta), TMath::Abs(secondLeadingDeltaTheta));
+  histocontainer_2["h2_LowerDeltaTheta_invmassJet"]->Fill(secondLeadingDeltaTheta, higgsCandidate.p4().M());
+  histocontainer_2["h2_HigherDeltaTheta_invmassJet"]->Fill(leadingDeltaTheta, higgsCandidate.p4().M());
+  histocontainer_["h_HigherTheta"]->Fill( leadingT.Phi() );
+  histocontainer_["h_LowerTheta"]->Fill( secondLeadingT.Phi() );
   
   myEvents++;
+ 
   
 }//END EVENT LOOP
 
@@ -815,12 +507,14 @@ bool ZH_channel_genLevel::muonJetCleaning(const pat::Jet& tmpJet, const std::vec
 
 //puliamo i muoni non isolati
 // if it is true get rid of the muon
-bool ZH_channel_genLevel::muonJetCleaning( const pat::Jet& patJet, const reco::Candidate* muCol, double drCut){
+bool ZH_channel_genLevel::muonJetCleaning( const pat::Jet& patJet, std::vector<const reco::Candidate*> muCol, double ptDiffCut){
   bool clean = false;
-  double dr = 1e10;
-  dr = Geom::deltaR( muCol->p4().Vect(), patJet.p4().Vect() );
-  if( dr < drCut )
-    clean = true;
+  double ptDiff = 1e10;
+  for(size_t muIdx = 0; muIdx < muCol.size(); ++muIdx){
+    ptDiff = TMath::Abs(muCol.at(muIdx)->pt() - patJet.p4().Pt());
+    if( ptDiff < ptDiffCut )
+      clean = true;
+  }  
   return clean;
 }
 
@@ -858,7 +552,7 @@ bool ZH_channel_genLevel::hasBdaughters( const reco::Candidate * particle ){
 }
 
 // calcolo dell'angolo nel piano eta phi della retta conguingente due jet
-double ZH_channel_genLevel::getAnglePhiEtaPlane( pat::Jet *leadingJet , pat::Jet *secondLeadingJet ){
+double ZH_channel_genLevel::getAnglePhiEtaPlane( const pat::Jet *leadingJet , const pat::Jet *secondLeadingJet ){
   double angle = 1e10;
   double deltaPhi = leadingJet->p4().Phi() - secondLeadingJet->p4().Phi();
   double deltaEta = leadingJet->p4().Eta() - secondLeadingJet->p4().Eta();
@@ -875,7 +569,7 @@ double ZH_channel_genLevel::getAnglePhiEtaPlane( const reco::Candidate *firstB ,
   return angle;
 }
 
-double ZH_channel_genLevel::getDeltaR( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
+double ZH_channel_genLevel::getDeltaR( const pat::Jet * leadingJet, const pat::Jet * secondLeadingJet ){
   double deltaR = 1e10;
   deltaR = Geom::deltaR( leadingJet->p4().Vect(), secondLeadingJet->p4().Vect() );
   return deltaR;
@@ -887,7 +581,7 @@ double ZH_channel_genLevel::getDeltaR( const reco::Candidate * firstB, const rec
   return deltaR;
 }
 
-double ZH_channel_genLevel::getDeltaR( TLorentzVector TLV, pat::Jet * patJet ){
+double ZH_channel_genLevel::getDeltaR( TLorentzVector TLV, const pat::Jet * patJet ){
   double deltaR = 1e10;
   TVector3 JetVector;
   JetVector.SetXYZ( patJet->p4().Px(), patJet->p4().Py(), patJet->p4().Pz() );
@@ -895,22 +589,7 @@ double ZH_channel_genLevel::getDeltaR( TLorentzVector TLV, pat::Jet * patJet ){
   return deltaR;
 }
 
-double ZH_channel_genLevel::getDeltaR( TLorentzVector TLV, const reco::Candidate* recoCand ){
-  double deltaR = 1e10;
-  TVector3 tv3;
-  tv3.SetXYZ( recoCand->momentum().X(), recoCand->momentum().Y(), recoCand->momentum().Z()  );
-  deltaR = tv3.DeltaR( TLV.Vect() ) ;
-  return deltaR;
-}
-double ZH_channel_genLevel::getDeltaR( const reco::Candidate* recoCand, TLorentzVector TLV ){
-  double deltaR = 1e10;
-  TVector3 tv3;
-  tv3.SetXYZ( recoCand->momentum().X(), recoCand->momentum().Y(), recoCand->momentum().Z()  );
-  deltaR = tv3.DeltaR( TLV.Vect() ) ;
-  return deltaR;
-}
-
-double ZH_channel_genLevel::getDeltaR( TVector3 TLV, pat::Jet * patJet ){
+double ZH_channel_genLevel::getDeltaR( TVector3 TLV, const pat::Jet * patJet ){
   double deltaR = 1e10;
   TVector3 JetVector;
   JetVector.SetXYZ( patJet->p4().Px(), patJet->p4().Py(), patJet->p4().Pz() );
@@ -918,7 +597,7 @@ double ZH_channel_genLevel::getDeltaR( TVector3 TLV, pat::Jet * patJet ){
   return deltaR;
 }
 
-double ZH_channel_genLevel::getDeltaEta( pat::Jet * leadingJet, pat::Jet * secondLeadingJet ){
+double ZH_channel_genLevel::getDeltaEta( const pat::Jet * leadingJet, const pat::Jet * secondLeadingJet ){
   double deltaEta = 1e10;
   deltaEta = leadingJet->p4().Eta() - secondLeadingJet->p4().Eta() ;
   return deltaEta;
@@ -930,7 +609,7 @@ double ZH_channel_genLevel::getDeltaEta( const reco::Candidate * firstB, const r
   return deltaEta;
 }
 
-double ZH_channel_genLevel::getDeltaPhi( pat::Jet* leadingJet, pat::Jet* secondLeadingJet){
+double ZH_channel_genLevel::getDeltaPhi( const pat::Jet* leadingJet, const pat::Jet* secondLeadingJet){
 
   double deltaPhi = 1e10;
   deltaPhi = Geom::deltaPhi( leadingJet->p4().Vect(), secondLeadingJet->p4().Vect() ) ;
@@ -938,7 +617,7 @@ double ZH_channel_genLevel::getDeltaPhi( pat::Jet* leadingJet, pat::Jet* secondL
 
 }
 
-double ZH_channel_genLevel::getPtAsymmetry(pat::Jet* leadingJet, pat::Jet* secondLeadingJet ){
+double ZH_channel_genLevel::getPtAsymmetry(const pat::Jet* leadingJet, const pat::Jet* secondLeadingJet ){
 
   double asymmetry = 1e10;
   double ptDiff = leadingJet->p4().Pt() - secondLeadingJet->p4().Pt();
@@ -956,7 +635,7 @@ double ZH_channel_genLevel::getPtAsymmetry(const reco::GenJet* leadingJet, const
   return asymmetry;
 }
 
-unsigned int ZH_channel_genLevel::getAssociatedB( std::vector<TLorentzVector> bHadron_vector, pat::Jet* leadingJet){
+unsigned int ZH_channel_genLevel::getAssociatedB( std::vector<TLorentzVector> bHadron_vector, const pat::Jet* leadingJet){
 
   //association Bvertex - Jet
   double deltaMin = 1e10;
@@ -973,7 +652,7 @@ unsigned int ZH_channel_genLevel::getAssociatedB( std::vector<TLorentzVector> bH
 }
 
 
-double ZH_channel_genLevel::getBBavProjection( pat::Jet* j1, pat::Jet* j2 ){
+double ZH_channel_genLevel::getBBavProjection( const pat::Jet* j1, const pat::Jet* j2 ){
 
   TVector2 ci;
   TVector2 r;
@@ -1005,7 +684,7 @@ double ZH_channel_genLevel::getBBavProjection( pat::Jet* j1, pat::Jet* j2 ){
 
 // FIXED variabile consigliata nell'articolo teorico sulla color reconnection
 // with bvertex information
-TVector2 ZH_channel_genLevel::getTvect( pat::Jet* patJet, TLorentzVector b ){
+TVector2 ZH_channel_genLevel::getTvect( const pat::Jet* patJet, TLorentzVector b ){
 
   TVector2 t_Vect(0,0);
   TVector2 ci(0,0);
@@ -1033,7 +712,7 @@ TVector2 ZH_channel_genLevel::getTvect( pat::Jet* patJet, TLorentzVector b ){
 }
 
 // without b vertex information
-TVector2 ZH_channel_genLevel::getTvect( pat::Jet* patJet ){
+TVector2 ZH_channel_genLevel::getTvect( const pat::Jet* patJet ){
 
   TVector2 t_Vect(0,0);
   TVector2 null(0,0);
@@ -1125,7 +804,7 @@ TVector2 ZH_channel_genLevel::getTvect( const reco::GenJet* genJet ){
 
 
 // with b vertex information
-double ZH_channel_genLevel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZH_channel_genLevel::getDeltaTheta( const pat::Jet* j1, const pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaTheta = 1e10;
   TVector2 v_b1(b1.Eta(), b1.Phi());
@@ -1143,7 +822,7 @@ double ZH_channel_genLevel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2, TLorentzV
 }
 
 //without b vertex information
-double ZH_channel_genLevel::getDeltaTheta( pat::Jet* j1, pat::Jet* j2 ){
+double ZH_channel_genLevel::getDeltaTheta( const pat::Jet* j1, const pat::Jet* j2 ){
 
   double deltaTheta = 1e10;
   TLorentzVector pi(0,0,0,0);
@@ -1246,7 +925,7 @@ double ZH_channel_genLevel::getDeltaTheta( const reco::GenJet* j1, const reco::G
 
 
 
-double ZH_channel_genLevel::getDeltaX( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZH_channel_genLevel::getDeltaX( const pat::Jet* j1, const pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaX = 1e10;
   TVector2 v_j1(j1->p4().Eta(), j1->p4().Phi());
@@ -1262,7 +941,7 @@ double ZH_channel_genLevel::getDeltaX( pat::Jet* j1, pat::Jet* j2, TLorentzVecto
 
 }
 
-double ZH_channel_genLevel::getDeltaY( pat::Jet* j1, pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
+double ZH_channel_genLevel::getDeltaY( const pat::Jet* j1, const pat::Jet* j2, TLorentzVector b1, TLorentzVector b2 ){
 
   double deltaY = 1e10;
   TVector2 v_j1(j1->p4().Eta(), j1->p4().Phi());
@@ -1278,7 +957,7 @@ double ZH_channel_genLevel::getDeltaY( pat::Jet* j1, pat::Jet* j2, TLorentzVecto
 
 }
 
-double ZH_channel_genLevel::getMyVar_background( pat::Jet* patJet, TVector3 Bpos ){
+double ZH_channel_genLevel::getMyVar_background( const pat::Jet* patJet, TVector3 Bpos ){
 
   TVector3 t_vect;
   double patJetTrackPt = 1e10;
@@ -1297,7 +976,7 @@ double ZH_channel_genLevel::getMyVar_background( pat::Jet* patJet, TVector3 Bpos
   return myvar;
 }
 
-double ZH_channel_genLevel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, double BanglePhiEtaPlane ){
+double ZH_channel_genLevel::getMyVar_signal( const pat::Jet* patJet, TVector3 Bpos, double BanglePhiEtaPlane ){
 
   TVector3 t_vect;
   double patJetTrackPt = 1e10;
@@ -1322,7 +1001,7 @@ double ZH_channel_genLevel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, do
 }
 
 
-TVector2 ZH_channel_genLevel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
+TVector2 ZH_channel_genLevel::getBBdir( const pat::Jet* j1, const pat::Jet* j2 ){
 
   TVector2 BBdir(0,0);
   TLorentzVector pi(0,0,0,0);
@@ -1363,7 +1042,7 @@ TVector2 ZH_channel_genLevel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
 }
 
 // return the jet with the highest |eta|, i.e. the closest to the beam
-inline pat::Jet* ZH_channel_genLevel::whichJet(pat::Jet *j1, pat::Jet *j2){
+inline const pat::Jet* ZH_channel_genLevel::whichJet(const pat::Jet *j1, const pat::Jet *j2){
 
   if( TMath::Abs( j1->p4().Eta() ) - TMath::Abs( j2->p4().Eta() ) > 0 )
     return j1;
@@ -1372,21 +1051,12 @@ inline pat::Jet* ZH_channel_genLevel::whichJet(pat::Jet *j1, pat::Jet *j2){
 }
 
 // return the opposite of whichJet
-inline pat::Jet* ZH_channel_genLevel::whichOtherJet(pat::Jet *j1, pat::Jet *j2){
+inline const pat::Jet* ZH_channel_genLevel::whichOtherJet(const pat::Jet *j1, const pat::Jet *j2){
 
   if( TMath::Abs( j1->p4().Eta() ) - TMath::Abs( j2->p4().Eta() ) < 0 )
     return j1;
   else
     return j2;
-}
-
-double ZH_channel_genLevel::getHelicity( pat::Jet* jet , TVector3 boost ){
-  double hel = 1e10;
-  TLorentzVector j;
-  j.SetPtEtaPhiE( jet->pt(), jet->eta(), jet->phi(), jet->energy() );
-  j.Boost( -boost );
-  hel = TMath::Cos( j.Vect().Angle( boost ) );
-  return hel;
 }
 
 
@@ -1413,66 +1083,186 @@ void ZH_channel_genLevel::beginJob()
   using namespace std;  
   edm::Service<TFileService> fs;
 
+  Int_t bin_cnt = 200;
+  Double_t min_cnt = 0;
+  Double_t max_cnt = 200;
 
-  tree_container["ZMuMu_channel"]=fs->make<TTree>("ZMuMu_channel","ZMuMu_channel");
+  histocontainer_["h_nOfpfcLeadingJet"]=fs->make<TH1D>("h_nOfpfcLeadingJet","nOfpfcLeadingJet", bin_cnt , min_cnt , max_cnt );
+  histocontainer_["h_nOfpfcSecondLeadingJet"]=fs->make<TH1D>("h_nOfpfcSecondLeadingJet","nOfpfcSecondLeadingJet", bin_cnt , min_cnt , max_cnt );
 
-  abis::make_branch(tree_container,"genb1_pt"                   ,genb1_pt);
-  abis::make_branch(tree_container,"genb1_eta"                  ,genb1_eta);
-  abis::make_branch(tree_container,"genb1_phi"                  ,genb1_phi);
-  abis::make_branch(tree_container,"genb1_energy"                 ,genb1_energy);
-  abis::make_branch(tree_container,"genb2_pt"                   ,genb2_pt);
-  abis::make_branch(tree_container,"genb2_eta"                  ,genb2_eta);
-  abis::make_branch(tree_container,"genb2_phi"                  ,genb2_phi);
-  abis::make_branch(tree_container,"genb2_energy"                 ,genb2_energy);
-  abis::make_branch(tree_container,"recoJet1_pt"                   ,recoJet1_pt);
-  abis::make_branch(tree_container,"recoJet1_eta"                  ,recoJet1_eta);
-  abis::make_branch(tree_container,"recoJet1_phi"                  ,recoJet1_phi);
-  abis::make_branch(tree_container,"recoJet1_energy"                 ,recoJet1_energy);
-  abis::make_branch(tree_container,"recoJet1_csv"                 ,recoJet1_csv);
-  abis::make_branch(tree_container,"recoJet2_pt"                   ,recoJet2_pt);
-  abis::make_branch(tree_container,"recoJet2_eta"                  ,recoJet2_eta);
-  abis::make_branch(tree_container,"recoJet2_phi"                  ,recoJet2_phi);
-  abis::make_branch(tree_container,"recoJet2_energy"                 ,recoJet2_energy);
-  abis::make_branch(tree_container,"recoJet2_csv"                 ,recoJet2_csv);
+  Int_t bin_asymmetry = 200;
+  Double_t min_asymmetry = -1;
+  Double_t max_asymmetry = 1;
 
-  abis::make_branch(tree_container,"genMu1_pt"                   ,genMu1_pt);
-  abis::make_branch(tree_container,"genMu1_eta"                  ,genMu1_eta);
-  abis::make_branch(tree_container,"genMu1_phi"                  ,genMu1_phi);
-  abis::make_branch(tree_container,"genMu1_energy"                 ,genMu1_energy);
-  abis::make_branch(tree_container,"genMu2_pt"                   ,genMu2_pt);
-  abis::make_branch(tree_container,"genMu2_eta"                  ,genMu2_eta);
-  abis::make_branch(tree_container,"genMu2_phi"                  ,genMu2_phi);
-  abis::make_branch(tree_container,"genMu2_energy"                 ,genMu2_energy);
-  abis::make_branch(tree_container,"genHiggs_pt"                   ,genHiggs_pt);
-  abis::make_branch(tree_container,"genHiggs_eta"                  ,genHiggs_eta);
-  abis::make_branch(tree_container,"genHiggs_phi"                  ,genHiggs_phi);
-  abis::make_branch(tree_container,"genHiggs_mass"                 ,genHiggs_mass);
-  abis::make_branch(tree_container,"genHiggs_helicity"             ,genHiggs_helicity);
-  abis::make_branch(tree_container,"recoHiggs_pt"                   ,recoHiggs_pt);
-  abis::make_branch(tree_container,"recoHiggs_eta"                  ,recoHiggs_eta);
-  abis::make_branch(tree_container,"recoHiggs_phi"                  ,recoHiggs_phi);
-  abis::make_branch(tree_container,"recoHiggs_mass"                 ,recoHiggs_mass);
-  abis::make_branch(tree_container,"recoHiggs_helicity"             ,recoHiggs_helicity);
-  abis::make_branch(tree_container,"genZ_pt"                   ,genZ_pt);
-  abis::make_branch(tree_container,"genZ_eta"                  ,genZ_eta);
-  abis::make_branch(tree_container,"genZ_phi"                  ,genZ_phi);
-  abis::make_branch(tree_container,"genZ_mass"                 ,genZ_mass);
-  abis::make_branch(tree_container,"genZ_helicity"                 ,genZ_helicity);
-  abis::make_branch(tree_container,"recoZ_pt"                   ,recoZ_pt);
-  abis::make_branch(tree_container,"recoZ_eta"                  ,recoZ_eta);
-  abis::make_branch(tree_container,"recoZ_phi"                  ,recoZ_phi);
-  abis::make_branch(tree_container,"recoZ_mass"                 ,recoZ_mass);
-  abis::make_branch(tree_container,"recoZ_helicity"                 ,recoZ_helicity);
-  abis::make_branch(tree_container,"genZH_deltaPhi"                  ,genZH_deltaPhi);
-  abis::make_branch(tree_container,"recoZH_deltaPhi"                 ,recoZH_deltaPhi);
+  histocontainer_["h_jetPtAsymmetryGeneral"]=fs->make<TH1D>("h_jetPtAsymmetryGeneral"," jet Pt Asymmetry", bin_asymmetry , min_asymmetry , max_asymmetry );
+
+  Int_t bin_angle = 300;
+  Double_t min_angle = -6.3;
+  Double_t max_angle = 6.3;
+  
+  histocontainer_["h_jetDeltaPhiGeneral"]=fs->make<TH1D>("h_jetDeltaPhiGeneral","h_jetDeltaPhi",bin_angle, min_angle, max_angle);
+  histocontainer_["h_HZ_deltaPhi"]=fs->make<TH1D>("h_HZ_deltaPhi","h_HZ_deltaPhi",bin_angle, min_angle, max_angle);
+  histocontainer_["h_alphaAngleGeneral"]=fs->make<TH1D>("h_alphaAngleGeneral","h_alphaAngleGeneral", bin_angle, min_angle, max_angle);
+  histocontainer_["h_deltaTheta"]=fs->make<TH1D>("h_deltaTheta","h_deltaTheta", bin_angle, min_angle, max_angle);
+  histocontainer_["h_HigherDeltaTheta"]=fs->make<TH1D>("h_HigherDeltaTheta","h_HigherDeltaTheta", bin_angle, min_angle, max_angle);
+  histocontainer_["h_LowerDeltaTheta"]=fs->make<TH1D>("h_LowerDeltaTheta","h_LowerDeltaTheta", bin_angle, min_angle, max_angle);
+  histocontainer_["h_AllDeltaTheta"]=fs->make<TH1D>("h_AllDeltaTheta","h_AllDeltaTheta", bin_angle, min_angle, max_angle);
+
+  histocontainer_["h_theta"]=fs->make<TH1D>("h_theta","h_theta", bin_angle, min_angle, max_angle);
+  histocontainer_["h_LowerTheta"]=fs->make<TH1D>("h_LowerTheta","h_LowerTheta", bin_angle, min_angle, max_angle);
+  histocontainer_["h_HigherTheta"]=fs->make<TH1D>("h_HigherTheta","h_HigherTheta", bin_angle, min_angle, max_angle);
+
+
+  Int_t bin_eta = 600;
+  Double_t min_eta = -3;
+  Double_t max_eta = 3;
+
+  histocontainer_["h_goodJetRapidity"]=fs->make<TH1D>("h_goodJetRapidity","h_goodJetRapidity",bin_eta, min_eta, max_eta);
+  histocontainer_["h_goodJetEta"]=fs->make<TH1D>("h_goodJetEta","h_goodJetEta",bin_eta, min_eta, max_eta);
+  histocontainer_["h_badJetRapidity"]=fs->make<TH1D>("h_badJetRapidity","h_badJetRapidity",bin_eta, min_eta, max_eta);
+  histocontainer_["h_badJetEta"]=fs->make<TH1D>("h_badJetEta","h_badJetEta",bin_eta, min_eta, max_eta);
+  histocontainer_["h_epsilonDeltaEtaGeneral"]=fs->make<TH1D>("h_epsilonDeltaEtaGeneral","deltaEta general", bin_eta, min_eta, max_eta);
+  histocontainer_["h_epsilonDeltaEtaSmartGeneral"]=fs->make<TH1D>("h_epsilonDeltaEtaSmartGeneral","deltaEtaSmart general", bin_eta, min_eta, max_eta);
+  histocontainer_["h_deltaEtaBJetGeneral"]=fs->make<TH1D>("h_deltaEtaBJetGeneral","h_deltaEtaBJetGeneral", bin_eta, min_eta, max_eta);
+  histocontainer_["h_jetDeltaEtaGeneral"]=fs->make<TH1D>("h_jetDeltaEtaGeneral","h_jetDeltaEtaGeneral", bin_eta, min_eta, max_eta);
+  histocontainer_["h_jetDeltaEtaSmartGeneral"]=fs->make<TH1D>("h_jetDeltaEtaSmartGeneral","h_jetDeltaEtaSmartGeneral", bin_eta, min_eta, max_eta);
+  histocontainer_["h_radiationEta"]=fs->make<TH1D>("h_radiationEta","h_radiationEta", bin_eta, min_eta, max_eta);
+
+
+  //Bool histo
+
+  histocontainer_["h_H_dau_hasBottom"]=fs->make<TH1D>("h_H_dau_hasBottom","h_H_dau_hasBottom",2,0,1);
+
+  Int_t bin_pt = 50;
+  Double_t min_pt = 0;
+  Double_t max_pt = 500;
+
+  histocontainer_["h_goodJetPt"]=fs->make<TH1D>("h_goodJetPt","h_goodJetPt",bin_pt, min_pt, max_pt);
+  histocontainer_["h_badJetPt"]=fs->make<TH1D>("h_badJetPt","h_badJetPt",bin_pt, min_pt, max_pt);
+  histocontainer_["h_higgsCandidate_pt"]=fs->make<TH1D>("h_higgsCandidate_pt","p_{t} of H candidate [GeV/c]", bin_pt, min_pt, max_pt);
+  histocontainer_["h_Zcandidate_pt"]=fs->make<TH1D>("h_Zcandidate_pt","h_Zcandidate_pt",bin_pt, min_pt, max_pt);
+  histocontainer_["h_Z_pt"]=fs->make<TH1D>("h_Z_pt","p_{t} of Z [GeV/c]", bin_pt, min_pt, max_pt);
+  histocontainer_["h_W_pt"]=fs->make<TH1D>("h_W_pt","p_{t} of W [GeV/c]", bin_pt, min_pt, max_pt);
+  histocontainer_["h_H_pt"]=fs->make<TH1D>("h_H_pt","p_{t} of H [GeV/c]", bin_pt, min_pt, max_pt);
+
+  
+  Int_t bin_pdgId = 2000;
+  Double_t min_pdgId = -1000;
+  Double_t max_pdgId = 1000;
+
+  histocontainer_["h_pdgId"]=fs->make<TH1D>("h_pdgId","pdgID", bin_pdgId, min_pdgId, max_pdgId);
+  histocontainer_["h_H_dau_pdgId"]=fs->make<TH1D>("h_H_dau_pdgId","h_H_dau_pdgId", bin_pdgId, min_pdgId, max_pdgId);
+  histocontainer_2["h2_pdgId_status"]=fs->make<TH2D>("h2_pdgId_status","pdgID vs status", bin_pdgId, min_pdgId, max_pdgId, 20 , -10 , 10);
+  histocontainer_2["h2_pdgId_particleID"]=fs->make<TH2D>("h2_pdgId_particleID","pdgID vs particleID", bin_pdgId, min_pdgId, max_pdgId, bin_pdgId, min_pdgId, max_pdgId );
+
+
+  Int_t bin_deltaR = 600;
+  Double_t min_deltaR = 0;
+  Double_t max_deltaR = 10;
+
+
+
+  histocontainer_["h_deltaR_general"]=fs->make<TH1D>("h_deltaR_general","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_jetDeltaR_general"]=fs->make<TH1D>("h_jetDeltaR_general","jetDeltaR general", bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_gammaDeltaRGeneral"]=fs->make<TH1D>("h_gammaDeltaRGeneral","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_jetDistancePerpendicularLineGeneral"]=fs->make<TH1D>("h_jetDistancePerpendicularLineGeneral","h_jetDistancePerpendicularLineGeneral",bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_["h_pfCandidateDRjet"]=fs->make<TH1D>("h_pfCandidateDRjet","deltaR pfc jet", bin_deltaR, min_deltaR, max_deltaR);
+
+  bin_deltaR = 600;
+  min_deltaR = -5;
+  max_deltaR = 5;
+
+  histocontainer_["h_betaDistanceGeneral"]=fs->make<TH1D>("h_betaDistanceGeneral","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
+
+  //redefinition of the binning on pt
+  bin_pt=1000;
+  min_pt=-100;
+  max_pt=100;
+
+  //redefine the binning on pt
+  bin_pt=100;
+  min_pt=0;
+  max_pt=500;
+
+
+  Int_t bin_mass = 1000;
+  Double_t min_mass = 0;
+  Double_t max_mass = 10;
+
+  histocontainer_["h_pfcMass"]=fs->make<TH1D>("h_pfcMass","h_pfcMass", bin_mass, min_mass, max_mass);
+
+  Int_t bin_invmass = 600;
+  Double_t min_invmass = 0;
+  Double_t max_invmass = 200;
+
+  histocontainer_["h_Zcandidate_mass"]=fs->make<TH1D>("h_Zcandidate_mass","h_Zcandidate_mass", bin_invmass, min_invmass, max_invmass);
+  histocontainer_["h_higgsCandidate_mass"]=fs->make<TH1D>("h_higgsCandidate_mass","h_higgsCandidate_mass", bin_invmass, min_invmass, max_invmass);
+  histocontainer_["h_invmassJet_general"]=fs->make<TH1D>("h_invmassJet_general","invmassJet general", bin_invmass, min_invmass, max_invmass);
+  histocontainer_["h_invmass_general"]=fs->make<TH1D>("h_invmass_general","invmass general", bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_jetDeltaR_higgsCandidateMass"]=fs->make<TH2D>("h2_jetDeltaR_higgsCandidateMass",
+								     "jetDeltaR vs higgs Mass", 
+								     bin_deltaR, min_deltaR, max_deltaR, 
+								     bin_invmass, min_invmass, max_invmass );
+  histocontainer_2["h2_jetDeltaR_jetPtAsymmetry"]=fs->make<TH2D>("h2_jetDeltaR_jetPtAsymmetry",
+								 "jetDeltaR vs jet Asymmetry", 
+								 bin_deltaR, min_deltaR, max_deltaR, 
+								 bin_asymmetry, min_asymmetry, max_asymmetry );
+
+
+  histocontainer_2["h2_alphaAngle_invmassJet"]=fs->make<TH2D>("h2_alphaAngle_invmassJet","h2_alphaAngle_invmassJet",bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_betaDistance_invmassJet"]=fs->make<TH2D>("h2_betaDistance_invmassJet","h2_betaDistance_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_gammaDeltaR_invmassJet"]=fs->make<TH2D>("h2_gammaDeltaR_invmassJet","h2_gammaDeltaR_invmassJet",bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_epsilonDeltaEta_invmassJet"]=fs->make<TH2D>("h2_epsilonDeltaEta_invmassJet","h2_epsilonDeltaEta_invmassJet",bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
+
+  histocontainer_2["h2_HigherDeltaTheta_LowerDeltaTheta"]=fs->make<TH2D>("h2_HigherDeltaTheta_LowerDeltaTheta","h2_HigherDeltaTheta_LowerDeltaTheta", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
+  histocontainer_2["h2_LowerDeltaTheta_invmassJet"]=fs->make<TH2D>("h2_LowerDeltaTheta_invmassJet","h2_LowerDeltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_HigherDeltaTheta_invmassJet"]=fs->make<TH2D>("h2_HigherDeltaTheta_invmassJet","h2_HigherDeltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_deltaTheta_invmassJet"]=fs->make<TH2D>("h2_deltaTheta_invmassJet","h2_deltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_deltaTheta_JetDeltaR"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaR","h2_deltaTheta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_2["h2_deltaTheta_JetDeltaEta"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaEta","h2_deltaTheta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
+  histocontainer_2["h2_deltaTheta_JetDeltaPhi"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaPhi","h2_deltaTheta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
+
+  histocontainer_2["h2_theta_invmassJet"]=fs->make<TH2D>("h2_theta_invmassJet","h2_theta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_theta_JetDeltaR"]=fs->make<TH2D>("h2_theta_JetDeltaR","h2_theta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_2["h2_theta_JetDeltaEta"]=fs->make<TH2D>("h2_theta_JetDeltaEta","h2_theta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
+  histocontainer_2["h2_theta_JetDeltaPhi"]=fs->make<TH2D>("h2_theta_JetDeltaPhi","h2_theta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
+
+  histocontainer_2["h2_AbsDeltatheta_invmassJet"]=fs->make<TH2D>("h2_AbsDeltatheta_invmassJet","h2_AbsDeltatheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_AbsDeltatheta_JetDeltaR"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaR","h2_AbsDeltatheta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_2["h2_AbsDeltatheta_JetDeltaEta"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaEta","h2_AbsDeltatheta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
+  histocontainer_2["h2_AbsDeltatheta_JetDeltaPhi"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaPhi","h2_AbsDeltatheta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
+
+
+  histocontainer_2["h2_JetDeltaEta_invmassJet"]=fs->make<TH2D>("h2_JetDeltaEta_invmassJet","h2_JetDeltaEta_invmassJet", bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_JetDeltaR_invmassJet"]=fs->make<TH2D>("h2_JetDeltaR_invmassJet","h2_JetDeltaR_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_JetDeltaPhi_invmassJet"]=fs->make<TH2D>("h2_JetDeltaPhi_invmassJet","h2_JetDeltaPhi_invmassJet",bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_jetPtAsymmetry_invmassJet"]=fs->make<TH2D>("h2_jetPtAsymmetry_invmassJet","h2_jetPtAsymmetry_invmassJet", bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_deltaEtaBJet_invmassJet"]=fs->make<TH2D>("h2_deltaEtaBJet_invmassJet","h2_deltaEtaBJet_invmassJet", bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_jetDistancePerpendicularLine_invmassJet"]=fs->make<TH2D>("h2_jetDistancePerpendicularLine_invmassJet","h2_jetDistancePerpendicularLine_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_deltaRGeneral_invmassJet"]=fs->make<TH2D>("h2_deltaRGeneral_invmassJet","h2_deltaRGeneral_invmassJet",bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
+  histocontainer_2["h2_jetDeltaEta_jetDeltaR"]=fs->make<TH2D>("h2_jetDeltaEta_jetDeltaR","h2_jetDeltaEta_jetDeltaR",bin_eta, min_eta, max_eta, bin_deltaR, min_deltaR, max_deltaR);
+  histocontainer_2["h2_deltaX_deltaY"]=fs->make<TH2D>("h2_deltaX_deltaY","h2_deltaX_deltaY",bin_eta, min_eta, max_eta, bin_angle, min_angle, max_angle);
+
+
+  Int_t bin_njets = 20;
+  Double_t min_njets = 0;
+  Double_t max_njets = 20;
+
+  histocontainer_["h_numberOfJets"]=fs->make<TH1D>("h_numberOfJets","h_numberOfJets", bin_njets, min_njets, max_njets);
+
+  histocontainer_["h_BBdir"]=fs->make<TH1D>("h_BBdir","h_BBdir", bin_angle, min_angle, max_angle);
+
+  histocontainer_2["h2_helicity_ptAsymm"]=fs->make<TH2D>("h2_helicity_ptAsymm","h2_helicity_ptAsymm", bin_asymmetry, min_asymmetry, max_asymmetry, bin_asymmetry, min_asymmetry, max_asymmetry );
+  histocontainer_2["h2_parton_helicity_ptAsymm"]=fs->make<TH2D>("h2_parton_helicity_ptAsymm","h2_parton_helicity_ptAsymm", bin_asymmetry, min_asymmetry, max_asymmetry, bin_asymmetry, min_asymmetry, max_asymmetry );
 
 }
 
 void ZH_channel_genLevel::endJob() {
 
-  std::cout << "Number of myEvents = " << myEvents << std::endl;
+  std::cout << "Number of events with at least two B hadrons = " << myEvents << std::endl;
   std::cout << "JOB FINISHED" << std::endl;
-
+  std::cout << "Different plane = " << different_plane << std::endl;
+  std::cout << "Same plane = " << same_plane << std::endl;
 }
 
 DEFINE_FWK_MODULE(ZH_channel_genLevel);

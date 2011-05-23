@@ -1,6 +1,7 @@
 /* ZH_channel.cxx analyzer             */
-/* v18 March 2011                      */
+/* v19 March 2011                      */
 /* Bortignon Pierluigi                 */
+/* DATA                                */
 /* Same as David :                     */
 /* higgs with most btagged smart       */
 /* Real Btagging                       */
@@ -11,6 +12,7 @@
 /* Gen level cross check added         */
 /* Z helicity added                    */
 /* ak7pfjet added                      */
+/* no more histo ONLY tree             */
 
 
 #include "VHbb/iCode/test/abis.cc"
@@ -179,28 +181,12 @@ private:
   edm::InputTag akt5pfJetsLabel_;
   edm::InputTag muonLabel_;
   //  edm::InputTag electronLabel_;
-  edm::InputTag genpLabel_;
-  edm::InputTag genJetsLabel_;
   edm::InputTag patJetLabel_;
   edm::InputTag ak7patJetLabel_;
   edm::ParameterSet pfJetIdSelector_;
 
-  std::vector<int> v_motherId;
-  std::vector<int> v_mother_status_background;
-
   std::vector<pat::Jet*> v_akt5pfj;
-  std::vector<pat::Jet*> v_akt5pfj_btag1;
-  std::vector<pat::Jet*> v_akt5pfj_btag2;
   std::vector<pat::Jet*> v_akt7pfj;
-
-  TLorentzVector TLV_bHadron_general;
-  TLorentzVector TLV_bHadron_signal;
-  TLorentzVector TLV_bHadron_background;
-
-  std::vector<TLorentzVector> bHadron_general;
-  std::vector<TLorentzVector> bHadron_signal;
-  std::vector<TLorentzVector> bHadron_background;
-
 
   // Member data
   Int_t n_event;  
@@ -218,7 +204,10 @@ private:
   Double_t minBTagging;
   Double_t maxBTagging;
   Double_t helicityCut;
+  Double_t jetPtThreshold;
 
+  Int_t nOfak5;
+  Int_t nOfak7;
 
   Double_t Zcandidate_pt;
   Double_t leading_higgsHelicity;
@@ -243,7 +232,13 @@ private:
   Double_t gammaDeltaR;
   Double_t BdeltaR;
   Double_t JetDeltaR;
-  Double_t genbDeltaR;
+
+  Double_t leadingBTag;
+  Double_t secondLeadingBTag;
+  std::vector<double> comb_deltaR;
+
+  Double_t leadingPt;
+  Double_t secondLeadingPt;
 
   Double_t Zhelicity;
 
@@ -255,13 +250,7 @@ private:
   Double_t jetDeltaPhi;
   Double_t jetPtAsymmetry;
 
-  Double_t myVar_background;
-  Double_t myVar_signal;
-
-  bool bHadron;  
-
-  unsigned int different_plane;
-  unsigned int same_plane;
+  bool jetVeto;
 
 };
 
@@ -285,10 +274,9 @@ ZH_channel::ZH_channel(const edm::ParameterSet& iConfig) :
   minBTagging(iConfig.getUntrackedParameter<double>("minBTagging")),
   maxBTagging(iConfig.getUntrackedParameter<double>("maxBTagging")),
   helicityCut(iConfig.getUntrackedParameter<double>("helicityCut")),
+  jetPtThreshold(iConfig.getUntrackedParameter<double>("jetPtThreshold")),
 
   //edm collection
-  genpLabel_(iConfig.getUntrackedParameter<edm::InputTag>("genPart")),
-  genJetsLabel_(iConfig.getUntrackedParameter<edm::InputTag>("ak5GenJets")),
   muonLabel_(iConfig.getUntrackedParameter<edm::InputTag>("muonCand")),
   //  electronLabel_(iConfig.getUntrackedParameter<edm::InputTag>("electronCand")),
   //  akt5pfJetsLabel_(iConfig.getUntrackedParameter<edm::InputTag>("akt5pfJets")),
@@ -298,8 +286,6 @@ ZH_channel::ZH_channel(const edm::ParameterSet& iConfig) :
 {
 
   //Initialize counters
-  different_plane = 0;
-  same_plane  = 0;
   n_event = 0;
   myEvents = 0;
 
@@ -310,8 +296,9 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   ++n_event;
 
   //initialising each events
-  higgs_pt = 0;
-  vector_pt = 0;
+  v_akt5pfj.clear();
+  v_akt7pfj.clear();
+  jetVeto = false;
 
   std::cout << "*** Analyzing " << iEvent.id() << " n_event = " << n_event << std::endl << std::endl;
 
@@ -368,56 +355,6 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
 //   std::sort( electrons.begin(), electrons.end(), etComparator);
 
 
-  // Generated particles handle
-  edm::Handle<reco::GenParticleCollection> genP;
-  iEvent.getByLabel(genpLabel_,genP);
-  //edm::View<reco::GenParticle> genParticles = *genP;
-  const reco::GenParticleCollection &genParticles = *genP.product();
-
-  // GenJets
-  edm::Handle<reco::GenJetCollection> genJets;
-  iEvent.getByLabel(genJetsLabel_,genJets);
-  const reco::GenJetCollection &genJ = *genJets.product();
-
-
-  v_motherId.clear();
-  v_mother_status_background.clear();
-  bHadron_general.clear();
-  bHadron_signal.clear();
-  bHadron_background.clear();
-  v_akt5pfj.clear();
-  v_akt5pfj_btag1.clear();
-  v_akt5pfj_btag2.clear();
-  v_akt7pfj.clear();
-
-
-  // PARTON LEVEL
-  TLorentzVector genHiggs;
-  TVector3 genHiggsBoost;
-  double genb1_higgsHelicity;
-  double genb2_higgsHelicity;
-  double bPtAsymmetry;
-  std::vector< TLorentzVector > genb;
-  genb.clear();
-  TLorentzVector TLV;
-  // Generated particles loop
-  for( reco::GenParticleCollection::const_iterator iGenp = genParticles.begin(); 
-       iGenp != genParticles.end();
-       ++iGenp) 
-    {
-      const reco::Candidate *genCandidate = &(*iGenp);
-      if( TMath::Abs( genCandidate->pdgId() ) == 5 
-	  //21 = gluon; 25 = higgs
-	  and ( not hasBMother(genCandidate) )
-	  and ( TMath::Abs( genCandidate->eta() ) < 5 ) ){
-	TLV.SetPtEtaPhiE( genCandidate->pt(),
-			  genCandidate->eta(),
-			  genCandidate->phi(),
-			  genCandidate->energy() );
-	genb.push_back( TLV );
-      }
-    }//END GENPARTICLEs LOOP
-  
 
   std::vector<const reco::Candidate*> v_muon;
   std::vector<const reco::Candidate*> v_muon_p;
@@ -430,9 +367,8 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   pat::Jet *iJet;
   pat::Jet *otherJet;
 
-  reco::CandidateCollection BhadronCollection;
-  reco::CandidateCollection BhadronCollectionSignal;
-  reco::CandidateCollection BhadronCollectionBackground;
+  pat::Jet *AK7leadingJet;
+  pat::Jet *AK7secondLeadingJet;
 
   //store good muons
   for( size_t muon_iter = 0; muon_iter < muons.size(); muon_iter++){
@@ -459,33 +395,18 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   if( v_muon_n.size() < 1
       or v_muon_p.size() < 1 )
     return void();
-  
-
-//   //store good electrons
-//   for( size_t ele_iter = 0; ele_iter < electrons.size(); ++ele_iter )
-//     if ( isInFiducial(electrons.at(ele_iter).caloPosition().eta() ) )
-//       v_ele.push_back( &(electrons.at(ele_iter) ) );  
-  
+    
   // The jets are pt ordered
   //AK5PF
   for(size_t jetIdx = 0; jetIdx < patJet.size(); ++jetIdx){
     if( patJet.at(jetIdx).isPFJet() == true 
  	and pfJetIDFunctor( patJet.at(jetIdx), ret ) == true 
-	and patJet.at(jetIdx).correctedJet("abs").pt() > 20
+	and patJet.at(jetIdx).correctedJet("L2L3Residual").pt() > jetPtThreshold
 	and muonJetCleaning( patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
-	and muonJetCleaning( patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false ){
-	v_akt5pfj.push_back( new pat::Jet (patJet.at(jetIdx).correctedJet("abs")) );
-      histocontainer_["h_goodJetRapidity"]->Fill( patJet.at(jetIdx).p4().Rapidity() );
-      histocontainer_["h_goodJetEta"]->Fill( patJet.at(jetIdx).p4().Eta() );
-      histocontainer_["h_goodJetPt"]->Fill( patJet.at(jetIdx).p4().Pt() );
-	}
-    else{
-      histocontainer_["h_badJetPt"]->Fill( patJet.at(jetIdx).p4().Pt() );
-      histocontainer_["h_badJetEta"]->Fill( patJet.at(jetIdx).p4().Eta() );
-      histocontainer_["h_badJetRapidity"]->Fill( patJet.at(jetIdx).p4().Rapidity() );
-	}
+	and muonJetCleaning( patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false )
+      v_akt5pfj.push_back( new pat::Jet (patJet.at(jetIdx).correctedJet("L2L3Residual")) );
   }  
-
+  
   //Event selection: at least two muons with opposite sign
   if( v_akt5pfj.size() < 2 )
     return void();
@@ -502,36 +423,30 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   for(size_t jetIdx = 0; jetIdx < ak7patJet.size(); ++jetIdx){
     if( ak7patJet.at(jetIdx).isPFJet() == true 
  	and pfJetIDFunctor( ak7patJet.at(jetIdx), ret ) == true 
-	and ak7patJet.at(jetIdx).correctedJet("abs").pt() > 20
+	and ak7patJet.at(jetIdx).correctedJet("L3Absolute").pt() > jetPtThreshold
 	and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
 	and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false ){
-      for( size_t ak5 = 0; ak5 < 1; ak5++ ){
-	if( getDeltaR( &(ak7patJet.at(jetIdx).correctedJet("abs")) , v_akt5pfj.at(ak5) ) < 0.3 )
-	  v_akt7pfj.push_back( new pat::Jet (ak7patJet.at(jetIdx).correctedJet("abs")) );
+      for( size_t ak5 = 0; ak5 < 2; ak5++ ){
+	if( getDeltaR( &(ak7patJet.at(jetIdx).correctedJet("L3Absolute")) , v_akt5pfj.at(ak5) ) < 0.5 )
+	  v_akt7pfj.push_back( new pat::Jet (ak7patJet.at(jetIdx).correctedJet("L3Absolute")) );
       }
     }
   }
+  if( v_akt7pfj.size() < 2 )
+    return void();
+  // fill the leading and second leading btagged jets
+  if( v_akt7pfj.at(0)->p4().Pt() >  v_akt7pfj.at(1)->p4().Pt() ){
+    AK7leadingJet = v_akt7pfj.at(0);
+    AK7secondLeadingJet = v_akt7pfj.at(1);
+  }
+  else{
+    AK7leadingJet = v_akt7pfj.at(1);
+    AK7secondLeadingJet = v_akt7pfj.at(0);
+  }
 
-  //Associate parton-jet
-  unsigned int ref1 = 1e2;
-  unsigned int ref2 = 1e2;
-  for(unsigned int i = 0; i < genb.size(); ++i){
-    if( getDeltaR( genb.at(i), v_akt5pfj.at(0) ) < 0.5 )
-      ref1 = i;
-    if( getDeltaR( genb.at(i), v_akt5pfj.at(1) ) < 0.5 )
-      ref2 = i;
-  }
-  if( ( ref1 + ref2 ) < 99 ){
-    genHiggs = genb.at(ref1) + genb.at(ref2);
-    genHiggsBoost = genHiggs.BoostVector();
-    genb1_higgsHelicity = getHelicity( genb.at(ref1), genHiggsBoost );
-    genb2_higgsHelicity = getHelicity( genb.at(ref2), genHiggsBoost );
-    bPtAsymmetry = ( genb.at(ref1).Pt() - genb.at(ref2).Pt() ) / ( genb.at(ref1).Pt() + genb.at(ref2).Pt() );
-    if( genb.at(ref1).Pt() > genb.at(ref2).Pt() )
-      histocontainer_2["h2_parton_helicity_ptAsymm_1"]->Fill( genb1_higgsHelicity, bPtAsymmetry );
-    else
-      histocontainer_2["h2_parton_helicity_ptAsymm_1"]->Fill( genb2_higgsHelicity, - bPtAsymmetry );
-  }
+  nOfak5 = v_akt5pfj.size();
+  nOfak7 = v_akt7pfj.size();
+
 
 
   // fill the leading and second leading btagged jets
@@ -544,13 +459,18 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
     secondLeadingJet = v_akt5pfj.at(0);
   }
 
+  leadingBTag = leadingJet->bDiscriminator("combinedSecondaryVertexBJetTags");
+  secondLeadingBTag = secondLeadingJet->bDiscriminator("combinedSecondaryVertexBJetTags");
+
+  leadingPt =  leadingJet->pt();
+  secondLeadingPt =  secondLeadingJet->pt();
+
   //taglio sul btag
   if( ( leadingJet->bDiscriminator("combinedSecondaryVertexBJetTags") < maxBTagging and
 	secondLeadingJet->bDiscriminator("combinedSecondaryVertexBJetTags") < maxBTagging )
       or ( leadingJet->bDiscriminator("combinedSecondaryVertexBJetTags") < minBTagging or
 	   secondLeadingJet->bDiscriminator("combinedSecondaryVertexBJetTags") < minBTagging ) )
     return void();
-
 
   //create the higgs candidate
   reco::CompositeCandidate higgsCandidate;
@@ -572,7 +492,6 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   higgsBoost = higgsP4.BoostVector();
   leading_higgsHelicity = getHelicity( leadingJet, higgsBoost );
   secondLeading_higgsHelicity = getHelicity( secondLeadingJet, higgsBoost );
-
 
   reco::CompositeCandidate Zcandidate;
   Zcandidate.addDaughter( *v_muon.at(0) );
@@ -603,16 +522,9 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
     std::sort(v_akt5pfj.begin(), v_akt5pfj.end(), ptJetComparator);
     //JET VETO
     //no additional akt5pfjets with pt > 50 GeV
-    if( v_akt5pfj.at(0)->p4().pt() > 20 )
-      return void();
+    if( v_akt5pfj.at(0)->p4().pt() > jetPtThreshold )
+      jetVeto = true;
   }
-
-  histocontainer_["h_higgsCandidate_pt"]->Fill( higgsCandidate_pt );
-  histocontainer_["h_Zcandidate_pt"]->Fill( Zcandidate_pt );
-  histocontainer_["h_Zcandidate_mass"]->Fill( Zcandidate.p4().M() );
-  histocontainer_["h_HZ_deltaPhi"]->Fill( ZH_deltaPhi );
-  histocontainer_2["h2_ptZ_ptH"]->Fill( Zcandidate_pt, higgsCandidate_pt );
-
 
   //Event selection
   if( Zcandidate_pt < ZCandidatePtCut
@@ -644,29 +556,24 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   JetDeltaEta = TMath::Abs( getDeltaEta( leadingJet, secondLeadingJet ) );
   jetDeltaPhi = getDeltaPhi( leadingJet, secondLeadingJet );
 
-  histocontainer_["h_higgsCandidate_mass"]->Fill( higgsCandidate.p4().M() );
-  histocontainer_["h_leading_higgsHelicity"]->Fill( leading_higgsHelicity );
-  histocontainer_["h_secondLeading_higgsHelicity"]->Fill( secondLeading_higgsHelicity );
-  histocontainer_["h_higgsHelicity"]->Fill( leading_higgsHelicity );
-  histocontainer_["h_higgsHelicity"]->Fill( secondLeading_higgsHelicity );
-  //  histocontainer_3["h3_helicity_ptAsymm_invmassJet"]->Fill( secondLeading_higgsHelicity, jetPtAsymmetry, higgsCandidate.p4().M() );
-  histocontainer_3["h3_helicity_ptAsymm_invmassJet"]->Fill( leading_higgsHelicity, jetPtAsymmetry, higgsCandidate.p4().M() );
 
-  if( ( ref1 + ref2 ) < 1e2 ){
-    genHiggs = genb.at(ref1) + genb.at(ref2);
-    genHiggsBoost = genHiggs.BoostVector();
-    genbDeltaR = genb.at(ref1).DeltaR( genb.at(ref2) );
-    genb1_higgsHelicity = getHelicity( genb.at(ref1), genHiggsBoost );
-    genb2_higgsHelicity = getHelicity( genb.at(ref2), genHiggsBoost );
-    bPtAsymmetry = ( genb.at(ref1).Pt() - genb.at(ref2).Pt() ) / ( genb.at(ref1).Pt() + genb.at(ref2).Pt() );
-    if( genb.at(ref1).Pt() > genb.at(ref2).Pt() )
-      histocontainer_2["h2_parton_helicity_ptAsymm_2"]->Fill( genb1_higgsHelicity, bPtAsymmetry );
-    else
-      histocontainer_2["h2_parton_helicity_ptAsymm_2"]->Fill( genb2_higgsHelicity, - bPtAsymmetry );
+
+  //pull for AKT7PF jet
+  TVector2 AK7secondLeadingT;
+  TVector2 AK7leadingT;
+  TVector2 AK7BBdir;  
+  AK7leadingDeltaTheta = 1e10;
+  AK7secondLeadingDeltaTheta = 1e10;
+  AK7secondLeadingT = getTvect(AK7secondLeadingJet);
+  AK7leadingT = getTvect(AK7leadingJet);
+  if(AK7secondLeadingT.Mod() > 1e-7 
+     and AK7leadingT.Mod() > 1e-7 ){
+    AK7BBdir =  getBBdir( AK7secondLeadingJet, AK7leadingJet );
+    AK7leadingDeltaTheta = TMath::Abs( getDeltaTheta( AK7leadingJet , AK7secondLeadingJet ) );
+    AK7secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( AK7secondLeadingJet, AK7leadingJet ) );
   }
 
-
-
+  //pull for AKT5PF jet
   TVector2 secondLeadingT;
   TVector2 leadingT;
   secondLeadingT = getTvect(secondLeadingJet);
@@ -677,23 +584,12 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
 
   TVector2 BBdir;  
   BBdir =  getBBdir( secondLeadingJet, leadingJet );
-  histocontainer_["h_BBdir"]->Fill( BBdir.Phi() );
 
   //plots the leading and second leading separately
   leadingDeltaTheta = 1e10;
   secondLeadingDeltaTheta = 1e10;
   leadingDeltaTheta = TMath::Abs( getDeltaTheta( leadingJet , secondLeadingJet ) );
   secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( secondLeadingJet, leadingJet ) );
-  histocontainer_["h_LowerDeltaTheta"]->Fill( secondLeadingDeltaTheta );
-  histocontainer_["h_HigherDeltaTheta"]->Fill( leadingDeltaTheta ); 
-  histocontainer_["h_AllDeltaTheta"]->Fill( secondLeadingDeltaTheta );
-  histocontainer_["h_AllDeltaTheta"]->Fill( leadingDeltaTheta );
-  histocontainer_2["h2_HigherDeltaTheta_LowerDeltaTheta"]->Fill(TMath::Abs(leadingDeltaTheta), TMath::Abs(secondLeadingDeltaTheta));
-  histocontainer_2["h2_LowerDeltaTheta_invmassJet"]->Fill(secondLeadingDeltaTheta, higgsCandidate.p4().M());
-  histocontainer_2["h2_HigherDeltaTheta_invmassJet"]->Fill(leadingDeltaTheta, higgsCandidate.p4().M());
-  histocontainer_["h_HigherTheta"]->Fill( leadingT.Phi() );
-  histocontainer_["h_LowerTheta"]->Fill( secondLeadingT.Phi() );
-
 
   // plots only the closest to the beam
   iJet = whichJet(leadingJet, secondLeadingJet);  
@@ -703,57 +599,14 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   double iTheta = 1e10;
   iDeltaTheta = 1e10;
   iTheta = iT.Phi();
-  histocontainer_["h_theta"]->Fill(iTheta);
-  
-  histocontainer_2["h2_theta_invmassJet"]->Fill(iTheta, higgsCandidate.p4().M());
-  histocontainer_2["h2_theta_JetDeltaEta"]->Fill(iTheta, JetDeltaEta);
-  histocontainer_2["h2_theta_JetDeltaR"]->Fill(iTheta, JetDeltaR);
-  histocontainer_2["h2_theta_JetDeltaPhi"]->Fill(iTheta, jetDeltaPhi);
-  
   iDeltaTheta = TMath::Abs( getDeltaTheta( iJet , otherJet ) );
   
-  histocontainer_["h_deltaTheta"]->Fill(iDeltaTheta);
-  histocontainer_2["h2_deltaTheta_invmassJet"]->Fill(iDeltaTheta, higgsCandidate.p4().M());
-  histocontainer_2["h2_deltaTheta_JetDeltaEta"]->Fill(iDeltaTheta, JetDeltaEta);
-  histocontainer_2["h2_deltaTheta_JetDeltaR"]->Fill(iDeltaTheta, JetDeltaR);
-  histocontainer_2["h2_deltaTheta_JetDeltaPhi"]->Fill(iDeltaTheta, jetDeltaPhi);
-  
-  histocontainer_2["h2_AbsDeltatheta_invmassJet"]->Fill(TMath::Abs(iDeltaTheta), higgsCandidate.p4().M());
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaEta"]->Fill(TMath::Abs(iDeltaTheta), JetDeltaEta);
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaR"]->Fill(TMath::Abs(iDeltaTheta), JetDeltaR);
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaPhi"]->Fill(TMath::Abs(iDeltaTheta), jetDeltaPhi);
-
-  histocontainer_3["h3_deltaTheta_ptAsymm_invmassJet"]->Fill(iDeltaTheta, jetPtAsymmetry, higgsCandidate.p4().M());  
-  histocontainer_3["h3_leadingdeltaTheta_ptAsymm_invmassJet"]->Fill(leadingDeltaTheta, jetPtAsymmetry, higgsCandidate.p4().M());  
-  histocontainer_3["h3_secondLeadingdeltaTheta_ptAsymm_invmassJet"]->Fill(secondLeadingDeltaTheta, jetPtAsymmetry, higgsCandidate.p4().M());  
-
-  // FILLING HISTOGRAMS
-  histocontainer_2["h2_jetDeltaR_higgsCandidateMass"]->Fill(JetDeltaR, higgsCandidate.p4().M());
-  histocontainer_2["h2_jetDeltaR_jetPtAsymmetry"]->Fill(JetDeltaR, jetPtAsymmetry );
-  
-  histocontainer_["h_jetDeltaPhiGeneral"]->Fill(jetDeltaPhi);
-  histocontainer_["h_jetPtAsymmetryGeneral"]->Fill(jetPtAsymmetry);
-  histocontainer_["h_jetDeltaR_general"]->Fill(JetDeltaR);
-  histocontainer_["h_jetDeltaEtaGeneral"]->Fill(JetDeltaEta);
-  histocontainer_["h_invmassJet_general"]->Fill(higgsCandidate.p4().M());
-
-  histocontainer_["h_numberOfJets"]->Fill(v_akt5pfj.size());
-  
-  histocontainer_2["h2_JetDeltaEta_invmassJet"]->Fill(JetDeltaEta, higgsCandidate.p4().M());
-  histocontainer_2["h2_JetDeltaR_invmassJet"]->Fill(JetDeltaR, higgsCandidate.p4().M());
-  histocontainer_2["h2_JetDeltaPhi_invmassJet"]->Fill(jetDeltaPhi, higgsCandidate.p4().M());
-  histocontainer_2["h2_jetPtAsymmetry_invmassJet"]->Fill(jetPtAsymmetry, higgsCandidate.p4().M());
-  histocontainer_2["h2_jetDeltaEta_jetDeltaR"]->Fill(JetDeltaEta, JetDeltaR);    
-
   tree_container["ZMuMu_channel"]->Fill();
   
   myEvents++;
   
   v_akt5pfj.clear();
-  v_akt5pfj_btag1.clear();
-  v_akt5pfj_btag2.clear();
   v_akt7pfj.clear();
-  genb.clear();  
   
 }//END EVENT LOOP
 
@@ -1162,6 +1015,7 @@ double ZH_channel::getMyVar_signal( pat::Jet* patJet, TVector3 Bpos, double Bang
 }
 
 
+
 TVector2 ZH_channel::getBBdir( pat::Jet* j1, pat::Jet* j2 ){
 
   TVector2 BBdir(0,0);
@@ -1231,14 +1085,6 @@ double ZH_channel::getHelicity( pat::Jet* jet , TVector3 boost ){
 }
 
 
-double ZH_channel::getHelicity( const reco::GenJet* jet , TVector3 boost ){
-  double hel = 1e10;
-  TLorentzVector j;
-  j.SetPtEtaPhiE( jet->pt(), jet->eta(), jet->phi(), jet->energy() );
-  j.Boost( -boost );
-  hel = TMath::Cos( j.Vect().Angle( boost ) );
-  return hel;
-}
 
 double ZH_channel::getHelicity( TLorentzVector b , TVector3 boost ){
   double hel = 1e10;
@@ -1282,198 +1128,12 @@ void ZH_channel::beginJob()
   abis::make_branch(tree_container,"jetDeltaR"                     ,JetDeltaR);
   abis::make_branch(tree_container,"Zcandidate_pt"                 ,Zcandidate_pt);
   abis::make_branch(tree_container,"higgsCandidate_pt"             ,higgsCandidate_pt);
-  abis::make_branch(tree_container,"genbDeltaR"                    ,genbDeltaR);
-
-
-  Int_t bin_cnt = 200;
-  Double_t min_cnt = 0;
-  Double_t max_cnt = 200;
-
-  histocontainer_["h_nOfpfcLeadingJet"]=fs->make<TH1D>("h_nOfpfcLeadingJet","nOfpfcLeadingJet", bin_cnt , min_cnt , max_cnt );
-  histocontainer_["h_nOfpfcSecondLeadingJet"]=fs->make<TH1D>("h_nOfpfcSecondLeadingJet","nOfpfcSecondLeadingJet", bin_cnt , min_cnt , max_cnt );
-
-  Int_t bin_asymmetry = 200;
-  Double_t min_asymmetry = -1;
-  Double_t max_asymmetry = 1;
-
-  histocontainer_["h_jetPtAsymmetryGeneral"]=fs->make<TH1D>("h_jetPtAsymmetryGeneral"," jet Pt Asymmetry", bin_asymmetry , min_asymmetry , max_asymmetry );
-
-  histocontainer_["h_higgsHelicity"]=fs->make<TH1D>("h_higgsHelicity","h_higgsHelicity", bin_asymmetry, min_asymmetry, max_asymmetry);
-  histocontainer_["h_leading_higgsHelicity"]=fs->make<TH1D>("h_leading_higgsHelicity","h_leading_higgsHelicity", bin_asymmetry, min_asymmetry, max_asymmetry);
-  histocontainer_["h_secondLeading_higgsHelicity"]=fs->make<TH1D>("h_secondLeading_higgsHelicity","h_secondLeading_higgsHelicity", bin_asymmetry, min_asymmetry, max_asymmetry);
-
-  Int_t bin_angle = 300;
-  Double_t min_angle = -6.3;
-  Double_t max_angle = 6.3;
-  
-  histocontainer_["h_jetDeltaPhiGeneral"]=fs->make<TH1D>("h_jetDeltaPhiGeneral","h_jetDeltaPhi",bin_angle, min_angle, max_angle);
-  histocontainer_["h_HZ_deltaPhi"]=fs->make<TH1D>("h_HZ_deltaPhi","h_HZ_deltaPhi",bin_angle, min_angle, max_angle);
-  histocontainer_["h_gen_HZ_deltaPhi"]=fs->make<TH1D>("h_gen_HZ_deltaPhi","h_gen_HZ_deltaPhi",bin_angle, min_angle, max_angle);
-  histocontainer_["h_alphaAngleGeneral"]=fs->make<TH1D>("h_alphaAngleGeneral","h_alphaAngleGeneral", bin_angle, min_angle, max_angle);
-  histocontainer_["h_deltaTheta"]=fs->make<TH1D>("h_deltaTheta","h_deltaTheta", bin_angle, min_angle, max_angle);
-  histocontainer_["h_HigherDeltaTheta"]=fs->make<TH1D>("h_HigherDeltaTheta","h_HigherDeltaTheta", bin_angle, min_angle, max_angle);
-  histocontainer_["h_LowerDeltaTheta"]=fs->make<TH1D>("h_LowerDeltaTheta","h_LowerDeltaTheta", bin_angle, min_angle, max_angle);
-  histocontainer_["h_AllDeltaTheta"]=fs->make<TH1D>("h_AllDeltaTheta","h_AllDeltaTheta", bin_angle, min_angle, max_angle);
-
-
-  histocontainer_["h_theta"]=fs->make<TH1D>("h_theta","h_theta", bin_angle, min_angle, max_angle);
-  histocontainer_["h_LowerTheta"]=fs->make<TH1D>("h_LowerTheta","h_LowerTheta", bin_angle, min_angle, max_angle);
-  histocontainer_["h_HigherTheta"]=fs->make<TH1D>("h_HigherTheta","h_HigherTheta", bin_angle, min_angle, max_angle);
-
-
-  Int_t bin_eta = 600;
-  Double_t min_eta = -3;
-  Double_t max_eta = 3;
-
-  histocontainer_["h_goodJetRapidity"]=fs->make<TH1D>("h_goodJetRapidity","h_goodJetRapidity",bin_eta, min_eta, max_eta);
-  histocontainer_["h_goodJetEta"]=fs->make<TH1D>("h_goodJetEta","h_goodJetEta",bin_eta, min_eta, max_eta);
-  histocontainer_["h_badJetRapidity"]=fs->make<TH1D>("h_badJetRapidity","h_badJetRapidity",bin_eta, min_eta, max_eta);
-  histocontainer_["h_badJetEta"]=fs->make<TH1D>("h_badJetEta","h_badJetEta",bin_eta, min_eta, max_eta);
-  histocontainer_["h_epsilonDeltaEtaGeneral"]=fs->make<TH1D>("h_epsilonDeltaEtaGeneral","deltaEta general", bin_eta, min_eta, max_eta);
-  histocontainer_["h_epsilonDeltaEtaSmartGeneral"]=fs->make<TH1D>("h_epsilonDeltaEtaSmartGeneral","deltaEtaSmart general", bin_eta, min_eta, max_eta);
-  histocontainer_["h_deltaEtaBJetGeneral"]=fs->make<TH1D>("h_deltaEtaBJetGeneral","h_deltaEtaBJetGeneral", bin_eta, min_eta, max_eta);
-  histocontainer_["h_jetDeltaEtaGeneral"]=fs->make<TH1D>("h_jetDeltaEtaGeneral","h_jetDeltaEtaGeneral", bin_eta, min_eta, max_eta);
-  histocontainer_["h_jetDeltaEtaSmartGeneral"]=fs->make<TH1D>("h_jetDeltaEtaSmartGeneral","h_jetDeltaEtaSmartGeneral", bin_eta, min_eta, max_eta);
-  histocontainer_["h_radiationEta"]=fs->make<TH1D>("h_radiationEta","h_radiationEta", bin_eta, min_eta, max_eta);
-
-
-  //Bool histo
-
-  histocontainer_["h_H_dau_hasBottom"]=fs->make<TH1D>("h_H_dau_hasBottom","h_H_dau_hasBottom",2,0,1);
-
-  Int_t bin_pt = 50;
-  Double_t min_pt = 0;
-  Double_t max_pt = 500;
-
-  histocontainer_["h_goodJetPt"]=fs->make<TH1D>("h_goodJetPt","h_goodJetPt",bin_pt, min_pt, max_pt);
-  histocontainer_["h_badJetPt"]=fs->make<TH1D>("h_badJetPt","h_badJetPt",bin_pt, min_pt, max_pt);
-  histocontainer_["h_higgsCandidate_pt"]=fs->make<TH1D>("h_higgsCandidate_pt","p_{t} of H candidate [GeV/c]", bin_pt, min_pt, max_pt);
-  histocontainer_["h_Zcandidate_pt"]=fs->make<TH1D>("h_Zcandidate_pt","h_Zcandidate_pt",bin_pt, min_pt, max_pt);
-  histocontainer_["h_Z_pt"]=fs->make<TH1D>("h_Z_pt","p_{t} of Z [GeV/c]", bin_pt, min_pt, max_pt);
-  histocontainer_["h_W_pt"]=fs->make<TH1D>("h_W_pt","p_{t} of W [GeV/c]", bin_pt, min_pt, max_pt);
-  histocontainer_["h_H_pt"]=fs->make<TH1D>("h_H_pt","p_{t} of H [GeV/c]", bin_pt, min_pt, max_pt);
-
-  
-  Int_t bin_pdgId = 2000;
-  Double_t min_pdgId = -1000;
-  Double_t max_pdgId = 1000;
-
-  histocontainer_["h_pdgId"]=fs->make<TH1D>("h_pdgId","pdgID", bin_pdgId, min_pdgId, max_pdgId);
-  histocontainer_["h_H_dau_pdgId"]=fs->make<TH1D>("h_H_dau_pdgId","h_H_dau_pdgId", bin_pdgId, min_pdgId, max_pdgId);
-  histocontainer_2["h2_pdgId_status"]=fs->make<TH2D>("h2_pdgId_status","pdgID vs status", bin_pdgId, min_pdgId, max_pdgId, 20 , -10 , 10);
-  histocontainer_2["h2_pdgId_particleID"]=fs->make<TH2D>("h2_pdgId_particleID","pdgID vs particleID", bin_pdgId, min_pdgId, max_pdgId, bin_pdgId, min_pdgId, max_pdgId );
-
-
-  Int_t bin_deltaR = 600;
-  Double_t min_deltaR = 0;
-  Double_t max_deltaR = 10;
-
-
-
-  histocontainer_["h_deltaR_general"]=fs->make<TH1D>("h_deltaR_general","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_["h_jetDeltaR_general"]=fs->make<TH1D>("h_jetDeltaR_general","jetDeltaR general", bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_["h_gammaDeltaRGeneral"]=fs->make<TH1D>("h_gammaDeltaRGeneral","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_["h_jetDistancePerpendicularLineGeneral"]=fs->make<TH1D>("h_jetDistancePerpendicularLineGeneral","h_jetDistancePerpendicularLineGeneral",bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_["h_pfCandidateDRjet"]=fs->make<TH1D>("h_pfCandidateDRjet","deltaR pfc jet", bin_deltaR, min_deltaR, max_deltaR);
-
-  bin_deltaR = 600;
-  min_deltaR = -5;
-  max_deltaR = 5;
-
-  histocontainer_["h_betaDistanceGeneral"]=fs->make<TH1D>("h_betaDistanceGeneral","deltaR general", bin_deltaR, min_deltaR, max_deltaR);
-
-  //redefinition of the binning on pt
-  bin_pt=1000;
-  min_pt=-100;
-  max_pt=100;
-
-  //redefine the binning on pt
-  bin_pt=100;
-  min_pt=0;
-  max_pt=500;
-
-  histocontainer_3["h3_deltaR_ptB1_pt_B2_general"]=fs->make<TH3D>("h3_deltaR_ptB1_pt_B2_general",
-								 "h3_deltaR_ptB1_pt_B2_general",
-								 bin_deltaR, min_deltaR, max_deltaR,
-								 bin_pt, min_pt, max_pt,
-								 bin_pt, min_pt, max_pt);
-
-  Int_t bin_mass = 1000;
-  Double_t min_mass = 0;
-  Double_t max_mass = 10;
-
-  histocontainer_["h_pfcMass"]=fs->make<TH1D>("h_pfcMass","h_pfcMass", bin_mass, min_mass, max_mass);
-
-  Int_t bin_invmass = 600;
-  Double_t min_invmass = 0;
-  Double_t max_invmass = 200;
-
-  histocontainer_["h_Zcandidate_mass"]=fs->make<TH1D>("h_Zcandidate_mass","h_Zcandidate_mass", bin_invmass, min_invmass, max_invmass);
-  histocontainer_["h_higgsCandidate_mass"]=fs->make<TH1D>("h_higgsCandidate_mass","h_higgsCandidate_mass", bin_invmass, min_invmass, max_invmass);
-  histocontainer_["h_invmassJet_general"]=fs->make<TH1D>("h_invmassJet_general","invmassJet general", bin_invmass, min_invmass, max_invmass);
-  histocontainer_["h_invmass_general"]=fs->make<TH1D>("h_invmass_general","invmass general", bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_jetDeltaR_higgsCandidateMass"]=fs->make<TH2D>("h2_jetDeltaR_higgsCandidateMass",
-								     "jetDeltaR vs higgs Mass", 
-								     bin_deltaR, min_deltaR, max_deltaR, 
-								     bin_invmass, min_invmass, max_invmass );
-  histocontainer_2["h2_jetDeltaR_jetPtAsymmetry"]=fs->make<TH2D>("h2_jetDeltaR_jetPtAsymmetry",
-								 "jetDeltaR vs jet Asymmetry", 
-								 bin_deltaR, min_deltaR, max_deltaR, 
-								 bin_asymmetry, min_asymmetry, max_asymmetry );
-
-
-  histocontainer_2["h2_alphaAngle_invmassJet"]=fs->make<TH2D>("h2_alphaAngle_invmassJet","h2_alphaAngle_invmassJet",bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_betaDistance_invmassJet"]=fs->make<TH2D>("h2_betaDistance_invmassJet","h2_betaDistance_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_gammaDeltaR_invmassJet"]=fs->make<TH2D>("h2_gammaDeltaR_invmassJet","h2_gammaDeltaR_invmassJet",bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_epsilonDeltaEta_invmassJet"]=fs->make<TH2D>("h2_epsilonDeltaEta_invmassJet","h2_epsilonDeltaEta_invmassJet",bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
-
-  histocontainer_2["h2_HigherDeltaTheta_LowerDeltaTheta"]=fs->make<TH2D>("h2_HigherDeltaTheta_LowerDeltaTheta","h2_HigherDeltaTheta_LowerDeltaTheta", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
-  histocontainer_2["h2_LowerDeltaTheta_invmassJet"]=fs->make<TH2D>("h2_LowerDeltaTheta_invmassJet","h2_LowerDeltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_HigherDeltaTheta_invmassJet"]=fs->make<TH2D>("h2_HigherDeltaTheta_invmassJet","h2_HigherDeltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_deltaTheta_invmassJet"]=fs->make<TH2D>("h2_deltaTheta_invmassJet","h2_deltaTheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_deltaTheta_JetDeltaR"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaR","h2_deltaTheta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_2["h2_deltaTheta_JetDeltaEta"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaEta","h2_deltaTheta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
-  histocontainer_2["h2_deltaTheta_JetDeltaPhi"]=fs->make<TH2D>("h2_deltaTheta_JetDeltaPhi","h2_deltaTheta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
-
-  histocontainer_2["h2_theta_invmassJet"]=fs->make<TH2D>("h2_theta_invmassJet","h2_theta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_theta_JetDeltaR"]=fs->make<TH2D>("h2_theta_JetDeltaR","h2_theta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_2["h2_theta_JetDeltaEta"]=fs->make<TH2D>("h2_theta_JetDeltaEta","h2_theta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
-  histocontainer_2["h2_theta_JetDeltaPhi"]=fs->make<TH2D>("h2_theta_JetDeltaPhi","h2_theta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
-
-  histocontainer_2["h2_AbsDeltatheta_invmassJet"]=fs->make<TH2D>("h2_AbsDeltatheta_invmassJet","h2_AbsDeltatheta_invmassJet", bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaR"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaR","h2_AbsDeltatheta_JetDeltaR", bin_angle, min_angle, max_angle, bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaEta"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaEta","h2_AbsDeltatheta_JetDeltaEta", bin_angle, min_angle, max_angle, bin_eta, min_eta, max_eta);
-  histocontainer_2["h2_AbsDeltatheta_JetDeltaPhi"]=fs->make<TH2D>("h2_AbsDeltatheta_JetDeltaPhi","h2_AbsDeltatheta_JetDeltaPhi", bin_angle, min_angle, max_angle, bin_angle, min_angle, max_angle);
-
-
-  histocontainer_2["h2_JetDeltaEta_invmassJet"]=fs->make<TH2D>("h2_JetDeltaEta_invmassJet","h2_JetDeltaEta_invmassJet", bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_JetDeltaR_invmassJet"]=fs->make<TH2D>("h2_JetDeltaR_invmassJet","h2_JetDeltaR_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_JetDeltaPhi_invmassJet"]=fs->make<TH2D>("h2_JetDeltaPhi_invmassJet","h2_JetDeltaPhi_invmassJet",bin_angle, min_angle, max_angle, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_jetPtAsymmetry_invmassJet"]=fs->make<TH2D>("h2_jetPtAsymmetry_invmassJet","h2_jetPtAsymmetry_invmassJet", bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_deltaEtaBJet_invmassJet"]=fs->make<TH2D>("h2_deltaEtaBJet_invmassJet","h2_deltaEtaBJet_invmassJet", bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_jetDistancePerpendicularLine_invmassJet"]=fs->make<TH2D>("h2_jetDistancePerpendicularLine_invmassJet","h2_jetDistancePerpendicularLine_invmassJet", bin_deltaR, min_deltaR, max_deltaR, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_deltaRGeneral_invmassJet"]=fs->make<TH2D>("h2_deltaRGeneral_invmassJet","h2_deltaRGeneral_invmassJet",bin_eta, min_eta, max_eta, bin_invmass, min_invmass, max_invmass);
-  histocontainer_2["h2_jetDeltaEta_jetDeltaR"]=fs->make<TH2D>("h2_jetDeltaEta_jetDeltaR","h2_jetDeltaEta_jetDeltaR",bin_eta, min_eta, max_eta, bin_deltaR, min_deltaR, max_deltaR);
-  histocontainer_2["h2_deltaX_deltaY"]=fs->make<TH2D>("h2_deltaX_deltaY","h2_deltaX_deltaY",bin_eta, min_eta, max_eta, bin_angle, min_angle, max_angle);
-
-  histocontainer_3["h3_deltaTheta_ptAsymm_invmassJet"]=fs->make<TH3D>("h3_deltaTheta_ptAsymm_invmassJet","h3_deltaTheta_ptAsymm_invmassJet", bin_angle, min_angle, max_angle, bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
-  histocontainer_3["h3_leadingdeltaTheta_ptAsymm_invmassJet"]=fs->make<TH3D>("h3_leadingdeltaTheta_ptAsymm_invmassJet","h3_leadingdeltaTheta_ptAsymm_invmassJet", bin_angle, min_angle, max_angle, bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
-  histocontainer_3["h3_secondLeadingdeltaTheta_ptAsymm_invmassJet"]=fs->make<TH3D>("h3_secondLeadingdeltaTheta_ptAsymm_invmassJet","h3_secondLeadingdeltaTheta_ptAsymm_invmassJet", bin_angle, min_angle, max_angle, bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
-
-  histocontainer_3["h3_helicity_ptAsymm_invmassJet"]=fs->make<TH3D>("h3_helicity_ptAsymm_invmassJet","h3_helicity_ptAsymm_invmassJet", bin_asymmetry, min_asymmetry, max_asymmetry, bin_asymmetry, min_asymmetry, max_asymmetry, bin_invmass, min_invmass, max_invmass);
-
-  Int_t bin_njets = 20;
-  Double_t min_njets = 0;
-  Double_t max_njets = 20;
-
-  histocontainer_["h_numberOfJets"]=fs->make<TH1D>("h_numberOfJets","h_numberOfJets", bin_njets, min_njets, max_njets);
-
-  histocontainer_["h_BBdir"]=fs->make<TH1D>("h_BBdir","h_BBdir", bin_angle, min_angle, max_angle);
-
-  histocontainer_2["h2_parton_helicity_ptAsymm_1"]=fs->make<TH2D>("h2_parton_helicity_ptAsymm_1","h2_parton_helicity_ptAsymm_1", bin_asymmetry, min_asymmetry, max_asymmetry, bin_asymmetry, min_asymmetry, max_asymmetry );
-  histocontainer_2["h2_parton_helicity_ptAsymm_2"]=fs->make<TH2D>("h2_parton_helicity_ptAsymm_2","h2_parton_helicity_ptAsymm_2", bin_asymmetry, min_asymmetry, max_asymmetry, bin_asymmetry, min_asymmetry, max_asymmetry );
-
-  histocontainer_2["h2_ptZ_ptH"]=fs->make<TH2D>("h2_ptZ_ptH","h2_ptZ_ptH", bin_pt, min_pt, max_pt, bin_pt, min_pt, max_pt);
+  abis::make_branch(tree_container,"leadingBTag"                   ,leadingBTag);
+  abis::make_branch(tree_container,"secondLeadingBTag"             ,secondLeadingBTag);
+  abis::make_branch(tree_container,"leadingPt"                     ,leadingPt);
+  abis::make_branch(tree_container,"secondLeadingPt"               ,secondLeadingPt);
+  abis::make_branch(tree_container,"jetVeto"                       ,jetVeto);
+  abis::make_branch(tree_container,"nOfak5"                        ,nOfak5);
 
 }
 
@@ -1481,8 +1141,7 @@ void ZH_channel::endJob() {
 
   std::cout << "Number of events with at least two B hadrons = " << myEvents << std::endl;
   std::cout << "JOB FINISHED" << std::endl;
-  std::cout << "Different plane = " << different_plane << std::endl;
-  std::cout << "Same plane = " << same_plane << std::endl;
+
 }
 
 DEFINE_FWK_MODULE(ZH_channel);

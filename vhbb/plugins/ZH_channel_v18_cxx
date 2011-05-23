@@ -191,6 +191,7 @@ private:
   std::vector<pat::Jet*> v_akt5pfj;
   std::vector<pat::Jet*> v_akt5pfj_btag1;
   std::vector<pat::Jet*> v_akt5pfj_btag2;
+  std::vector<pat::Jet*> v_akt7pfj;
 
   TLorentzVector TLV_bHadron_general;
   TLorentzVector TLV_bHadron_signal;
@@ -242,11 +243,14 @@ private:
   Double_t gammaDeltaR;
   Double_t BdeltaR;
   Double_t JetDeltaR;
+  Double_t genbDeltaR;
 
   Double_t Zhelicity;
 
   Double_t leadingDeltaTheta;
   Double_t secondLeadingDeltaTheta;
+  Double_t AK7leadingDeltaTheta;
+  Double_t AK7secondLeadingDeltaTheta;
 
   Double_t jetDeltaPhi;
   Double_t jetPtAsymmetry;
@@ -384,6 +388,7 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   v_akt5pfj.clear();
   v_akt5pfj_btag1.clear();
   v_akt5pfj_btag2.clear();
+  v_akt7pfj.clear();
 
 
   // PARTON LEVEL
@@ -425,6 +430,9 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   pat::Jet *iJet;
   pat::Jet *otherJet;
 
+  pat::Jet *AK7leadingJet;
+  pat::Jet *AK7secondLeadingJet;
+
   reco::CandidateCollection BhadronCollection;
   reco::CandidateCollection BhadronCollectionSignal;
   reco::CandidateCollection BhadronCollectionBackground;
@@ -462,6 +470,7 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
 //       v_ele.push_back( &(electrons.at(ele_iter) ) );  
   
   // The jets are pt ordered
+  //AK5PF
   for(size_t jetIdx = 0; jetIdx < patJet.size(); ++jetIdx){
     if( patJet.at(jetIdx).isPFJet() == true 
  	and pfJetIDFunctor( patJet.at(jetIdx), ret ) == true 
@@ -478,8 +487,7 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
       histocontainer_["h_badJetEta"]->Fill( patJet.at(jetIdx).p4().Eta() );
       histocontainer_["h_badJetRapidity"]->Fill( patJet.at(jetIdx).p4().Rapidity() );
 	}
-  }
-
+  }  
 
   //Event selection: at least two muons with opposite sign
   if( v_akt5pfj.size() < 2 )
@@ -492,6 +500,32 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   // REAL BTAGGING
   //ordering jets using BTagging information
   std::sort(v_akt5pfj.begin(), v_akt5pfj.end(), btagComparator);    
+
+  //Associate the first two AKT5 and AK7PF
+  for(size_t jetIdx = 0; jetIdx < ak7patJet.size(); ++jetIdx){
+    if( ak7patJet.at(jetIdx).isPFJet() == true 
+ 	and pfJetIDFunctor( ak7patJet.at(jetIdx), ret ) == true 
+	and ak7patJet.at(jetIdx).correctedJet("abs").pt() > 20
+	and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_p.at(0), muonJetCleaningDRcut ) == false 
+	and muonJetCleaning( ak7patJet.at(jetIdx), v_muon_n.at(0), muonJetCleaningDRcut ) == false ){
+      for( size_t ak5 = 0; ak5 < 2; ak5++ ){
+	if( getDeltaR( &(ak7patJet.at(jetIdx).correctedJet("abs")) , v_akt5pfj.at(ak5) ) < 0.5 )
+	  v_akt7pfj.push_back( new pat::Jet (ak7patJet.at(jetIdx).correctedJet("abs")) );
+      }
+    }
+  }
+  if( v_akt7pfj.size() < 2 )
+    return void();
+  // fill the leading and second leading btagged jets
+  if( v_akt7pfj.at(0)->p4().Pt() >  v_akt7pfj.at(1)->p4().Pt() ){
+    AK7leadingJet = v_akt7pfj.at(0);
+    AK7secondLeadingJet = v_akt7pfj.at(1);
+  }
+  else{
+    AK7leadingJet = v_akt7pfj.at(1);
+    AK7secondLeadingJet = v_akt7pfj.at(0);
+  }
+
 
   //Associate parton-jet
   unsigned int ref1 = 1e2;
@@ -636,6 +670,7 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   if( ( ref1 + ref2 ) < 1e2 ){
     genHiggs = genb.at(ref1) + genb.at(ref2);
     genHiggsBoost = genHiggs.BoostVector();
+    genbDeltaR = genb.at(ref1).DeltaR( genb.at(ref2) );
     genb1_higgsHelicity = getHelicity( genb.at(ref1), genHiggsBoost );
     genb2_higgsHelicity = getHelicity( genb.at(ref2), genHiggsBoost );
     bPtAsymmetry = ( genb.at(ref1).Pt() - genb.at(ref2).Pt() ) / ( genb.at(ref1).Pt() + genb.at(ref2).Pt() );
@@ -646,7 +681,22 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   }
 
 
+  //pull for AKT7PF jet
+  TVector2 AK7secondLeadingT;
+  TVector2 AK7leadingT;
+  TVector2 AK7BBdir;  
+  AK7leadingDeltaTheta = 1e10;
+  AK7secondLeadingDeltaTheta = 1e10;
+  AK7secondLeadingT = getTvect(AK7secondLeadingJet);
+  AK7leadingT = getTvect(AK7leadingJet);
+  if(AK7secondLeadingT.Mod() > 1e-7 
+     and AK7leadingT.Mod() > 1e-7 ){
+    AK7BBdir =  getBBdir( AK7secondLeadingJet, AK7leadingJet );
+    AK7leadingDeltaTheta = TMath::Abs( getDeltaTheta( AK7leadingJet , AK7secondLeadingJet ) );
+    AK7secondLeadingDeltaTheta = TMath::Abs( getDeltaTheta( AK7secondLeadingJet, AK7leadingJet ) );
+  }
 
+  //pull for AKT5PF jet
   TVector2 secondLeadingT;
   TVector2 leadingT;
   secondLeadingT = getTvect(secondLeadingJet);
@@ -732,6 +782,7 @@ void ZH_channel::analyze(const edm::Event& iEvent, const edm::EventSetup& setup)
   v_akt5pfj.clear();
   v_akt5pfj_btag1.clear();
   v_akt5pfj_btag2.clear();
+  v_akt7pfj.clear();
   genb.clear();  
   
 }//END EVENT LOOP
@@ -1248,19 +1299,20 @@ void ZH_channel::beginJob()
 
   tree_container["ZMuMu_channel"]=fs->make<TTree>("ZMuMu_channel","ZMuMu_channel");
 
-  abis::make_branch(tree_container,"Zcandidate_pt"                 ,Zcandidate_pt);
-  abis::make_branch(tree_container,"higgsCandidate_pt"             ,higgsCandidate_pt);
   abis::make_branch(tree_container,"Zhelicity"                     ,Zhelicity);
   abis::make_branch(tree_container,"higgsCandidate_mass"           ,higgsCandidate_mass);
   abis::make_branch(tree_container,"jetPtAsymmetry"                ,jetPtAsymmetry);
   abis::make_branch(tree_container,"leading_higgsHelicity"         ,leading_higgsHelicity);
   abis::make_branch(tree_container,"secondLeading_higgsHelicity"   ,secondLeading_higgsHelicity);
+  abis::make_branch(tree_container,"AK7leadingDeltaTheta"          ,AK7leadingDeltaTheta);
+  abis::make_branch(tree_container,"AK7secondLeadingDeltaTheta"    ,AK7secondLeadingDeltaTheta);
   abis::make_branch(tree_container,"leadingDeltaTheta"             ,leadingDeltaTheta);
   abis::make_branch(tree_container,"secondLeadingDeltaTheta"       ,secondLeadingDeltaTheta);
   abis::make_branch(tree_container,"iDeltaTheta"                   ,iDeltaTheta);
   abis::make_branch(tree_container,"jetDeltaR"                     ,JetDeltaR);
   abis::make_branch(tree_container,"Zcandidate_pt"                 ,Zcandidate_pt);
   abis::make_branch(tree_container,"higgsCandidate_pt"             ,higgsCandidate_pt);
+  abis::make_branch(tree_container,"genbDeltaR"                    ,genbDeltaR);
 
 
   Int_t bin_cnt = 200;
