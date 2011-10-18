@@ -178,10 +178,9 @@ class CountHisto : public Histos {
       subDir = f.GetDirectory(suffix.c_str());
     subDir->cd();
     count = new TH1F(("Count"+suffix).c_str(),("Count ("+suffix+")").c_str(), 1,0,2 );
-    
   }
-  virtual void fill(ntupleReader &iEvent,float w) {
-    count->Fill(1,w);
+  virtual void fill( ntupleReader & event, float w){
+    count->Fill(1, w);
   }
   
   TH1F * count;
@@ -259,10 +258,9 @@ public:
     StH_HPt->Fill(iEvent.H_pt, w); 
     StH_HHel->Fill(iEvent.hJet_cosTheta[0], w); 
     StH_HPullAngle->Fill(iEvent.deltaPullAngle, w); 
-
-    std::cout << iEvent.Vtype << std::endl;
     
-    if( iEvent.Vtype == 0 || iEvent.Vtype == 1 || iEvent.Vtype == 4 ){
+    iType = (VType)iEvent.Vtype;
+    if( iType == Zmm || iType == Zee || iType == Znn ){
       StH_ZMass->Fill(iEvent.V_mass, w); 
       StH_ZPt->Fill(iEvent.V_pt, w);
       StH_ZH_dPhi->Fill(iEvent. HVdPhi, w); 

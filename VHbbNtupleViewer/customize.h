@@ -15,11 +15,12 @@ struct Options
  float max;
 };
 
-std::map<std::string,Options> options;
 
+std::map<std::string,Options> options;
 void initOptions()
 {
-Options o1;
-o1.rebin=10;
-options["VlightRegionHWen/SimpleJets_dPhiVlightRegionHWen"]=o1; 
+  Options o1;
+  o1.rebin=10;
+  std::string sampleString("VlightRegionZee");
+  options[sampleString]=o1; 
 }

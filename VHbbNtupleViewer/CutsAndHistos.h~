@@ -7,10 +7,13 @@
 #include <TFile.h>
 #include "ntupleReader.h"
 
+enum  VType{ Zmm, Zee, Wmn, Wen, Znn } iType;
+
 class Histos {
 public:
    virtual void book(TFile &f, std::string suffix) = 0;
    virtual void fill( ntupleReader &event, float w) = 0;
+/*    virtual void copy( TFile& fin ) = 0; */
 //   virtual Histos * clone() =0;
 };
 

@@ -1,12 +1,12 @@
 #!/bin/sh
-echo "Do you want to train mc?"
+echo "Do you want to prepare the plots mc?"
 read MC
 if [ "$MC" == "yes" ]
 then
     echo "with which fileList?"
     read MCFILELIST
 fi
-echo "Do you want to train data?"
+echo "Do you want to prepare the plots for data?"
 read DATA
 if [ "$DATA" == "yes" ]
 then
