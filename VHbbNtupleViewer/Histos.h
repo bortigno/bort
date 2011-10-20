@@ -333,6 +333,7 @@ public:
 
   virtual void book(TFile &f, std::string suffix) {
 
+    suffix+=channel;
     //    std::clog << "Start booking" << std::endl;
 
     TDirectory *subDir;
@@ -352,13 +353,12 @@ public:
   
   virtual void fill(ntupleReader &iEvent,float w) {
 
-    //    std::clog << "Start filling" << std::endl;
-
     TMVA::Reader * reader = new TMVA::Reader();
     
     float bbMass,bbPt,btag1,btag2,NaddJet,DeltaRbb,helicity,DeltaPhiVH,bPt1,bPt2,VMass,VPt,pullAngle,DeltaEtabb,deltaPhipfMETjet,pfMET,pfMETsig;
-    
-    if(channel == "Zmm"){
+    std::string analysis("Zee");    
+
+    if(analysis == "Zmm"){
       reader->AddVariable( "bbMass",            &bbMass    );
       reader->AddVariable( "VMass",             &VMass     );
       reader->AddVariable( "bbPt",              &bbPt      );
@@ -366,36 +366,27 @@ public:
       reader->AddVariable( "btag1",             &btag1     );
       reader->AddVariable( "btag2",             &btag2     );
       reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
-      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);
     }
-    else if(channel == "Zee"){      
-      reader->AddVariable( "bbMass",            &bbMass    );
-      reader->AddVariable( "VMass",             &VMass     );
-      reader->AddVariable( "bbPt",              &bbPt      );
-      reader->AddVariable( "VPt",               &VPt       );
-      reader->AddVariable( "btag1",             &btag1     );
-      reader->AddVariable( "btag2",             &btag2     );
-      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
-      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
+    else if(analysis == "Zee"){      
+      reader->AddVariable( "H.mass",            &bbMass    );
+      reader->AddVariable( "H.pt",              &bbPt      );
+      reader->AddVariable( "H.dEta",        &DeltaEtabb);      
+      reader->AddVariable( "HVdPhi",        &DeltaPhiVH);
+      reader->AddVariable( "V.mass",            &VMass     );
+      reader->AddVariable( "V.pt",               &VPt       );
+      reader->AddVariable( "hJet_csv[0]",             &btag1     );
+      reader->AddVariable( "hJet_csv[1]",             &btag2     );
     }
-    else if(channel == "Znn"){      
+    else if(analysis == "Znn"){
       reader->AddVariable( "bbMass",            &bbMass    );
       reader->AddVariable( "bbPt",              &bbPt      );
       reader->AddVariable( "pfMET",             &pfMET     );
       reader->AddVariable( "btag1",             &btag1     );
       reader->AddVariable( "btag2",             &btag2     );
-      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);      
-    } 
-    else if(channel == "We"){
-      reader->AddVariable( "bbMass",            &bbMass    );
-      reader->AddVariable( "bbPt",              &bbPt      );
-      reader->AddVariable( "VPt",               &VPt       );
-      reader->AddVariable( "btag1",             &btag1     );
-      reader->AddVariable( "btag2",             &btag2     );
       reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
-      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);      
     }
-    else if(channel == "Wm"){           
+    else if(analysis == "We"){
       reader->AddVariable( "bbMass",            &bbMass    );
       reader->AddVariable( "bbPt",              &bbPt      );
       reader->AddVariable( "VPt",               &VPt       );
@@ -404,17 +395,26 @@ public:
       reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
       reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);
     }
-    
+    else if(analysis == "Wm"){
+      reader->AddVariable( "bbMass",            &bbMass    );
+      reader->AddVariable( "bbPt",              &bbPt      );
+      reader->AddVariable( "VPt",               &VPt       );
+      reader->AddVariable( "btag1",             &btag1     );
+      reader->AddVariable( "btag2",             &btag2     );
+      reader->AddVariable( "DeltaPhiVH",        &DeltaPhiVH);
+      reader->AddVariable( "DeltaEtabb",        &DeltaEtabb);
+    }
+
     // --- Book the MVA methods
 
     std::vector<std::string> methods;
     methods.push_back("BDT");
     TString dir    = "weights/";
-    TString prefix = "TMVAClassification";
+    TString prefix = "MVA";
     //    std::clog << "Booking MVA method..." << std::endl;
     for (size_t it = 0; it < methods.size(); ++it) {
       TString methodName = methods.at(it)+ " method";
-      TString weightfile = dir + prefix + "_" + methods.at(it) + "." + channel + TString("_weight.xml");
+      TString weightfile = dir + prefix + "_" + methods.at(it) + "_" + channel + TString(".weights.xml");
       reader->BookMVA( methodName, weightfile ); 
     }
         
@@ -444,7 +444,7 @@ public:
  
 private:
 
-  const std::string &channel;
+  const std::string channel;
   Int_t bin_BDT;
   Double_t min_BDT;
   Double_t max_BDT;

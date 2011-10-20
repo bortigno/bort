@@ -10,13 +10,16 @@
 
 void prepareAllZHistos(std::vector<CutsAndHistos *> & allHistosZ,TFile *fout  )
 {
+  std::string Zee110("ZH110");
   std::cout << "Book Z" << std::endl;
   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  //  allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new MVAHistos(Zee110)));
   allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  //  allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new MVAHistos(Zee110)));
   allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  //  allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new MVAHistos(Zee110)));
+  allHistosZ.push_back(new CutsAndHistos(new SignalRegionHZee,new StandardHistos));
+  //  allHistosZ.push_back(new CutsAndHistos(new SignalRegionHZee,new MVAHistos(Zee110)));
   for(size_t a=0;a < allHistosZ.size(); a++)
     {
       allHistosZ[a]->book(*fout);

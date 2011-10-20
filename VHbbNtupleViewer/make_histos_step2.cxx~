@@ -10,13 +10,16 @@
 
 void prepareAllZHistos(std::vector<CutsAndHistos *> & allHistosZ,TFile *fout  )
 {
+  std::string Zee110("ZH110");
   std::cout << "Book Z" << std::endl;
   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZmumu,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new VlightRegionHZee,new MVAHistos(Zee110)));
   allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZmumu,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new VbbRegionHZee,new MVAHistos(Zee110)));
   allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new StandardHistos));
-  //   allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZmumu,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new TTbarRegionHZee,new MVAHistos(Zee110)));
+  allHistosZ.push_back(new CutsAndHistos(new SignalRegionHZee,new StandardHistos));
+  allHistosZ.push_back(new CutsAndHistos(new SignalRegionHZee,new MVAHistos(Zee110)));
   for(size_t a=0;a < allHistosZ.size(); a++)
     {
       allHistosZ[a]->book(*fout);
@@ -39,7 +42,8 @@ int main(int argc, char **argv)
   int b=0;
   int c=0;
 
-  std::string name(argv[2]);  
+  std::string name(argv[2]);
+  std::cout << name << std::endl;
   std::string procType(argv[3]);
 
   if(argc < 4)
@@ -62,10 +66,9 @@ int main(int argc, char **argv)
   //TFile f("../test/PAT.edm.root");
   //  TFile f("../test/VHbbPAT.edm_6_0_HAB.root");
   //ddTFile &f =* TFile::Open("/scratch/arizzi/VHbbPAT.edm_9_0_tPZ.root");
-  //  TFile *fout = new TFile((name+"_histos.root").c_str(),"RECREATE");
-  TFile *fout; 
- if(verbose_)
-    std::cout << "CReating the histograms" << std::endl;
+  TFile *fout = new TFile((name+"_histos.root").c_str(),"RECREATE");
+  if(verbose_)
+    std::cout << "Creating the histograms" << std::endl;
   TH1F * countAll = new TH1F("Count","Count",1,0,2);
   TH1F * countAllWithPU =  new TH1F("CountWithPU","CountWithPU",1,0,2);
 

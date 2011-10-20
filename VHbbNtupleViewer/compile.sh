@@ -1,1 +1,2 @@
-g++ -o make_histos_step2 make_histos_step2.cxx -I $ROOTSYS/include `root-config --glibs`
+g++ -q -o make_histos_step2 make_histos_step2.cxx -I $ROOTSYS/include -I $ROOTSYS/include/TMVA -l TMVA -L $ROOTSYS/lib `root-config --glibs`
+g++ -q -o TMVAClassification TMVAClassification.cxx -I $ROOTSYS/include -I $ROOTSYS/include/TMVA -l TMVA -L $ROOTSYS/lib `root-config --glibs`

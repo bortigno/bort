@@ -66,20 +66,6 @@ std::vector<Sample> samples()
 {
  std::vector<Sample> s;
 
-/*
-235224077.721 Multi_DT/DoubleElectron_May10Rereco/res/lumiSummary.json
-814780712.247 Multi_DT/DoubleElectron_PromptReco/res/lumiSummary.json
-833435176.929 Multi_DT/DoubleMu_PromptReco/res/lumiSummary.json
-235558534.699 Multi_DT/METBTag_May10Rereco/res/lumiSummary.json
-787760254.134 Multi_DT/MET_PromptReco/res/lumiSummary.json
-231959363.356 Multi_DT/SingleElectron_May10Rereco/res/lumiSummary.json
-811788598.096 Multi_DT/SingleElectron_PromptReco/res/lumiSummary.json
-219100833.649 Multi_DT/SingleMu_May10Rereco/res/lumiSummary.json
-788877165.417 Multi_DT/SingleMu_PromptReco/res/lumiSummary.json
-
-
-*/
-
   Double_t ZeeL=215.094+930.228+370.915+662.967;
   //  ZeeL=1143;
 
@@ -87,8 +73,8 @@ std::vector<Sample> samples()
  std::string pathData("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V9/oct7Ntuple/histos/");
 // s.push_back(Sample(1000,"data","SingleMu_HBB_EDMNtupleV1_ProcV2_CandV1_may_histos.root",0 , true,219));
 // s.push_back(Sample(1000,"data","SingleMu_HBB_EDMNtupleV1_ProcV2_CandV1_prompt_histos.root",0 , true,789));
-// s.push_back(Sample(1000,"data",pathData+"TestDoubleElectron_Run2010-2011A_merged_histos.root",0 , true,ZeeL ));
- s.push_back(Sample(1000,"data",pathData+"TestDoubleElectron_Run2011A_PromptRecoV4_histos.root",0 , true,930.228 ));
+ s.push_back(Sample(1000,"data",pathData+"TestDoubleElectron_Run2010-2011A_merged_histos.root",0 , true,ZeeL ));
+ // s.push_back(Sample(1000,"data",pathData+"TestDoubleElectron_Run2011A_PromptRecoV4_histos.root",0 , true,930.228 ));
 
 // s.push_back(Sample(1000,"data","DoubleElectron_HBB_EDMNtupleV1_ProcV2_CandV1_may_histos.root", 0, true ,235.22));
 // s.push_back(Sample(1000,"data","DoubleElectron_HBB_EDMNtupleV1_ProcV2_CandV1_prompt_histos.root",1 , true,814.5 ));
@@ -101,16 +87,6 @@ std::vector<Sample> samples()
 
 
   s.push_back(Sample(165,"TTbar",path+"TestTTJets_TuneZ2_7TeV-madgraph-tauola_histos.root", kBlue , false ));
-
-/*
-histMassWjetLF->SetFillColor(kSpring-6);
-histMassWjetHF->SetFillColor(kSpring);
-histMassTTbar->SetFillColor(kBlue);
-histMassQCD->SetFillColor(kMagenta);
-histMassWW->SetFillColor(kOrange+10);
-histMassWZ->SetFillColor(kOrange+10);
-histMassSingleToptW->SetFillColor(kTeal);
-*/
 
 int stcolor=kTeal;
 
@@ -128,26 +104,25 @@ int stcolor=kTeal;
  float c=6264682;
  float l=12276242;
  
-/*  s.push_back(Sample(wxsec*b/t,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kSpring, false )); */
-/*  s.push_back(Sample(wxsec*c/t,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kSpring-4, false )); */
-/*  s.push_back(Sample(wxsec*l/t,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kSpring-6, false )); */
- s.push_back(Sample(wxsec,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kSpring, false ));
- s.push_back(Sample(wxsec,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kSpring-4, false ));
- s.push_back(Sample(wxsec,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kSpring-6, false ));
+ s.push_back(Sample(wxsec,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kGreen+3, false ));
+ s.push_back(Sample(wxsec,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kGreen+3, false ));
+ s.push_back(Sample(wxsec,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kGreen+3, false ));
 
 
  float zxsecMG=2045;
-/*  s.push_back(Sample(3048*0.0441,"Zb",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosB.root",9 ,false )); */
-/*  s.push_back(Sample(3048*0.244,"Zc",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosC.root",11 ,false )); */
-/*  s.push_back(Sample(3048*0.711,"Zl",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosL.root",12 ,false )); */
- s.push_back(Sample(3048,"Zb",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosB.root",9 ,false ));
- s.push_back(Sample(3048,"Zc",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosC.root",11 ,false ));
- s.push_back(Sample(3048,"Zl",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosL.root",12 ,false ));
+ s.push_back(Sample(3048,"Zb",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosB.root",kYellow ,false ));
+ s.push_back(Sample(3048,"Zc",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosC.root",kYellow-5 ,false ));
+ s.push_back(Sample(3048,"Zl",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosL.root",kYellow-6 ,false ));
+
+/*  s.push_back(Sample(24,"Zb",path+"TestDYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola_histosB.root",kYellow ,false )); */
+/*  s.push_back(Sample(24,"Zc",path+"TestDYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola_histosC.root",kYellow-5 ,false )); */
+/*  s.push_back(Sample(24,"Zl",path+"TestDYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola_histosL.root",kYellow-6 ,false )); */
  
- int VVcolor=5;
- s.push_back(Sample(42.9,"VV",path+"TestWW_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+10 , false ));
- s.push_back(Sample(18.3,"VV",path+"TestWZ_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+10 , false ));
- s.push_back(Sample(5.9,"VV",path+"TestZZ_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+10 , false ));
+ s.push_back(Sample(42.9,"VV",path+"TestWW_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+2 , false ));
+ s.push_back(Sample(18.3,"VV",path+"TestWZ_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+2 , false ));
+ s.push_back(Sample(5.9,"VV",path+"TestZZ_TuneZ2_7TeV_pythia6_tauola_histos.root",kOrange+2 , false ));
+
+ // s.push_back(Sample((0.4107*0.704*0.03365*3),"ZH","TestZH_ZToLL_HToBB_M-130_7TeV-powheg-herwigpp_histos.root",kAzure,false ));
 
  return s;
 }

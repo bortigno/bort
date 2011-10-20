@@ -128,9 +128,13 @@ int stcolor=kTeal;
  float c=6264682;
  float l=12276242;
  
- s.push_back(Sample(wxsec*b/t,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kSpring, false ));
- s.push_back(Sample(wxsec*c/t,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kSpring-4, false ));
- s.push_back(Sample(wxsec*l/t,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kSpring-6, false ));
+/*  s.push_back(Sample(wxsec*b/t,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kSpring, false )); */
+/*  s.push_back(Sample(wxsec*c/t,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kSpring-4, false )); */
+/*  s.push_back(Sample(wxsec*l/t,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kSpring-6, false )); */
+ s.push_back(Sample(wxsec,"Wb",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosB.root", kSpring, false ));
+ s.push_back(Sample(wxsec,"Wc",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosC.root", kSpring-4, false ));
+ s.push_back(Sample(wxsec,"Wl",path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_histosL.root", kSpring-6, false ));
+
 
  float zxsecMG=2045;
 /*  s.push_back(Sample(3048*0.0441,"Zb",path+"TestDYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_histosB.root",9 ,false )); */
