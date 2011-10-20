@@ -69,8 +69,8 @@ std::vector<Sample> samples()
   Double_t ZeeL=215.094+930.228+370.915+662.967;
   //  ZeeL=1143;
 
- std::string path("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V9/oct9Ntuple/histos/");
- std::string pathData("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V9/oct7Ntuple/histos/");
+ std::string path("/data1/VHbbAnalysis/EDMNtuple_step2/V9/oct9Ntuple/histos/");
+ std::string pathData("/data1/VHbbAnalysis/EDMNtuple_step2/V9/oct7Ntuple/histos/");
 // s.push_back(Sample(1000,"data","SingleMu_HBB_EDMNtupleV1_ProcV2_CandV1_may_histos.root",0 , true,219));
 // s.push_back(Sample(1000,"data","SingleMu_HBB_EDMNtupleV1_ProcV2_CandV1_prompt_histos.root",0 , true,789));
  s.push_back(Sample(1000,"data",pathData+"TestDoubleElectron_Run2010-2011A_merged_histos.root",0 , true,ZeeL ));
