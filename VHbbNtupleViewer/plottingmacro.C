@@ -83,7 +83,7 @@ void plottingmacro()
       TH1F *hd = ((TH1F*)data.file()->Get(names[i].c_str()));
       Options o=options[names[i]];
       hd->Rebin(o.rebin);
-      hd->SetMarkerStyle(21);
+      hd->SetMarkerStyle(20);
       hd->Draw("E1");
       hd->SetYTitle(o.yaxis.c_str());
 
@@ -101,7 +101,7 @@ void plottingmacro()
 	    {
 	      TH1F * h = ((TH1F*)s[j].file()->Get(names[i].c_str()));
 	      h->Scale(s[j].scale(data.lumi()));
-	      h->SetLineColor(s[j].color);
+	      h->SetLineWidth(1.);
 	      h->SetFillColor(s[j].color);
 	      h->Rebin(options[names[i]].rebin);
 	      if(grouped.find(s[j].name)!=grouped.end()) {
@@ -143,11 +143,18 @@ void plottingmacro()
  	}   
       std::cout << " Tot: " << tot << "+-" << sqrt(toterr2) <<  " SF: " << hd->Integral()/tot << std::endl;
       c = new TCanvas();
+      if (hd->GetMaximum() > sta2->GetMaximum()) sta2->SetMaximum(hd->GetMaximum());
+      else sta2->SetMaximum(sta2->GetMaximum());
       sta2->Draw();
       hd->Draw("E1,same");
       sta2->GetYaxis()->SetRangeUser(options[names[i]].min,options[names[i]].max);
       hd->GetYaxis()->SetRangeUser(options[names[i]].min,options[names[i]].max);
       l->Draw();
+
+
+      
+
+      c->Print("Test.pdf");
    
    
 
