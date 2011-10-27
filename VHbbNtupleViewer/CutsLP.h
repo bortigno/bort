@@ -88,4 +88,20 @@ class SignalRegionHZee: public Cut{
   }
 };
 
+class BDTRegionHZee: public Cut{
+  std::string name() {return "BDTRegionHZee";};
+  Bool_t pass(ntupleReader &p){
+    return ( p.Vtype == 1
+	     && p.hJet_pt[0] > 20. 
+	     && p.hJet_pt[1] > 20. 
+	     && p.hJet_csv[0] > 0.244 
+	     && p.hJet_csv[1] > 0.244 
+	     && p.H_pt > 100. 
+	     && p.V_pt > 100. 
+	     && p.V_mass > 75. 
+	     && p.V_mass < 105 
+	     && p.CountAddJets() < 2 );
+  }
+};
+
 #endif
