@@ -1,20 +1,34 @@
-countBackExp=SFLight*countSignal115DYL + SFTTbar*countSignal115TTbar + SFHeavy*countSignal115DYB + countSignal115VV + countSignal115ST
+countExpDYL=SFLight*countSignalCCDYL;
+countExpTTbar=SFTTbar*countSignalCCTTbar;
+countExpDYB=SFHeavy*countSignalCCDYB;
 
-errorBackExp= ( D[countBackExp,SFLight]^2 * errorSFLight^2 +
-                D[countBackExp,countSignal115DYL]^2 * errorSignal115DYL^2 +
+errorExpDYL=Sqrt[ D[countExpDYL, SFLight]^2 * errorSFLight + D[countExpDYL,countSignalCCDYL]^2 * errorSignalCCDYL ];
+errorExpTTbar=Sqrt[ D[countExpTTbar, SFTTbar]^2 * errorSFTTbar + D[countExpTTbar,countSignalCCTTbar]^2 * errorSignalCCTTbar ];
+errorExpDYB=Sqrt[ D[countExpDYB, SFHeavy]^2 * errorSFHeavy + D[countExpDYB,countSignalCCDYB]^2 * errorSignalCCDYB ];
 
-						    D[countBackExp,SFTTbar]^2 * errorSFTTbar^2 +
-                D[countBackExp,countSignal115TTbar]^2 * errorSignal115TTbar^2 +
+countBackExp=SFLight*countSignalCCDYL + SFTTbar*countSignalCCTTbar + SFHeavy*countSignalCCDYB + countSignalCCVV + countSignalCCST;
 
-                D[countBackExp,SFHeavy]^2 * errorSFHeavy^2 +
-                D[countBackExp,countSignal115DYB]^2 * errorSignal115DYB^2 +
+errorBackExp= Sqrt[( D[countBackExp,SFLight]^2 * errorSFLight^2 +
+		     D[countBackExp,countSignalCCDYL]^2 * errorSignalCCDYL^2 +
+		     D[countBackExp,SFTTbar]^2 * errorSFTTbar^2 +
+		     D[countBackExp,countSignalCCTTbar]^2 * errorSignalCCTTbar^2 +
+		     D[countBackExp,SFHeavy]^2 * errorSFHeavy^2 +
+		     D[countBackExp,countSignalCCDYB]^2 * errorSignalCCDYB^2 +
+		     D[countBackExp,countSignalCCVV]^2 * errorSignalCCVV^2 +
+		     D[countBackExp,countSignalCCST]^2 * errorSignalCCST^2 +
+		     2*D[countBackExp,SFLight]*D[countBackExp,SFTTbar]*covSFLightSFTTbar +
+		     2*D[countBackExp,SFLight]*D[countBackExp,SFHeavy]*covSFLightSFHeavy +
+		     2*D[countBackExp,SFHeavy]*D[countBackExp,SFTTbar]*covSFHeavySFTTbar ) ];
 
-                D[countBackExp,countSignal115VV]^2 * errorSignal115VV^2 +
-                D[countBackExp,countSignal115ST]^2 * errorSignal115ST^2 +
+errorBackExpNoCorr= Sqrt[( D[countBackExp,SFLight]^2 * errorSFLight^2 +
+			   D[countBackExp,countSignalCCDYL]^2 * errorSignalCCDYL^2 +
+			   D[countBackExp,SFTTbar]^2 * errorSFTTbar^2 +
+			   D[countBackExp,countSignalCCTTbar]^2 * errorSignalCCTTbar^2 +
+			   D[countBackExp,SFHeavy]^2 * errorSFHeavy^2 +
+			   D[countBackExp,countSignalCCDYB]^2 * errorSignalCCDYB^2 +
+			   D[countBackExp,countSignalCCVV]^2 * errorSignalCCVV^2 +
+			   D[countBackExp,countSignalCCST]^2 * errorSignalCCST^2 ) ];
 
-                2*D[countBackExp,SFLight]*D[countBackExp,SFTTbar]*covSFLightSFTTbar +
-                2*D[countBackExp,SFLight]*D[countBackExp,SFHeavy]*covSFLightSFHeavy +
-                2*D[countBackExp,SFHeavy]*D[countBackExp,SFTTbar]*covSFHeavySFTTbar )
 
 m = { { countLightCCDYL   , countLightCCTTbar   , countLightCCDYB   },
       { countTTbarCCDYL   , countTTbarCCTTbar   , countTTbarCCDYB   },
@@ -88,62 +102,6 @@ errorSFTTbar = Sqrt[Vy[[2,2]]]
 errorSFHeavy = Sqrt[Vy[[3,3]]]
 
 
-countLightCCDYL = 1937.12
-countTTbarCCDYL = 0.785351
-countHeavyCCDYL = 13.6845
-countLightCCTTbar  = 1.94897
-countTTbarCCTTbar  = 161.51
-countHeavyCCTTbar  = 11.4636
-countLightCCDYB  = 113.185
-countTTbarCCDYB  = 4.29065
-countHeavyCCDYB  = 95.7915
-countLightCCRest  = 2073.8
-countTTbarCCRest  = 172.912
-countHeavyCCRest  = 147.344
-countSignal115DYL  = 2.0452
-countSignal115TTbar  = 4.79828
-countSignal115DYB  = 22.6904
-countSignal115VV  = 0.916096
-countSignal115ST  = 0.192396
-(*Errors*)
-errorLightCCDYL = 13.5487
-errorTTbarCCDYL = 0.454865
-errorHeavyCCDYL = 1.576
-errorLightCCTTbar  = 0.447124
-errorTTbarCCTTbar  = 3.90231
-errorHeavyCCTTbar  = 0.982999
-errorLightCCDYB  = 3.34908
-errorTTbarCCDYB  = 0.641678
-errorHeavyCCDYB  = 3.932
-errorLightCCRest  = 45.8388
-errorTTbarCCRest  = 13.5165
-errorHeavyCCRest  = 12.289
-errorSignal115DYL  = 0.567236
-errorSignal115TTbar  = 0.685469
-errorSignal115DYB  = 1.89747
-errorSignal115VV  = 0.279913
-errorSignal115ST  = 0.0896013
-
-(*without MC uncert*)
-errorLightCCDYL = 0
-errorTTbarCCDYL = 0
-errorHeavyCCDYL = 0
-errorLightCCTTbar  = 0
-errorTTbarCCTTbar  = 0
-errorHeavyCCTTbar  = 0
-errorLightCCDYB  = 0
-errorTTbarCCDYB  = 0
-errorHeavyCCDYB  = 0
-errorLightCCRest  = Sqrt[2101]
-errorTTbarCCRest  = Sqrt[180]
-errorHeavyCCRest  = Sqrt[151]
-errorSignal115DYL  = 0
-errorSignal115TTbar  = 0
-errorSignal115DYB  = 0
-errorSignal115VV  = 0
-errorSignal115ST  = 0
-
-  (*updated 3.5*)
 countLightCCDYL = 3433.12
 countTTbarCCDYL = 0.795455
 countHeavyCCDYL = 17.2483
@@ -153,19 +111,10 @@ countHeavyCCTTbar  = 14.3554
 countLightCCDYB  = 207.448
 countTTbarCCDYB  = 6.26514
 countHeavyCCDYB  = 125.035
-countLightCCMc  = 51.9649
-countTTbarCCMc  = 6.15704
-countHeavyCCMc  = 4.50551
-countLightCCData  = 3856
-countTTbarCCData  = 194
-countHeavyCCData  = 175
 countLightCCRest  = 3804.04
 countTTbarCCRest  = 187.843
 countHeavyCCRest  = 170.494
-countSignal115DYL  = 0.000681669
-countSignal115TTbar  = 0.00191257
-countSignal115DYB  = 0.0080876
-Erroring
+
 errorLightCCDYL = 22.7827
 errorTTbarCCDYL = 0.561444
 errorHeavyCCDYL = 2.22851
@@ -175,22 +124,21 @@ errorHeavyCCTTbar  = 1.48064
 errorLightCCDYB  = 5.56675
 errorTTbarCCDYB  = 1.06172
 errorHeavyCCDYB  = 5.75329
-errorLightCCMc  = 0.764805
-errorTTbarCCMc  = 0.434616
-errorHeavyCCMc  = 0.180772
-errorLightCCData  = 62.0967
-errorTTbarCCData  = 13.9284
-errorHeavyCCData  = 13.2288
-errorLightCCRest  = 62.1014
-errorTTbarCCRest  = 13.9352
-errorHeavyCCRest  = 13.23
-  (*fakes*)
-errorSignal115DYL  = 0.567236
-errorSignal115TTbar  = 0.685469
-errorSignal115DYB  = 1.89747
-errorSignal115VV  = 0.279913
-errorSignal115ST  = 0.0896013
+errorLightCCRest  = 63.9936
+errorTTbarCCRest  = 14.045
+errorHeavyCCRest  = 13.2863
 
+  (* For signal region *)
+countSignalCCDYL = 0
+countSignalCCTTbar  = 0.01
+countSignalCCDYB  = 1.5
+countSignalCCST  = 0.03
+countSignalCCVV  = 0.27
+errorSignalCCDYL = 0
+errorSignalCCTTbar  = 0.06
+errorSignalCCDYB  = 0.56
+errorSignalCCST  = 0.1
+errorSignalCCVV  = 0.05
  
   Print[TraditionalForm["SFLight = "],SFLight,TraditionalForm[" +- "], errorSFLight]
   Print[TraditionalForm["SFTTbar = "],SFTTbar,TraditionalForm[" +- "], errorSFTTbar]
@@ -199,3 +147,13 @@ errorSignal115ST  = 0.0896013
   Print[TraditionalForm["Cov(SFLight,SFTTbar)"],Vy[[2,1]]]
   Print[TraditionalForm["Cov(SFLight,SFHeavy)"],Vy[[3,1]]]
   Print[TraditionalForm["Cov(SFTTbar,SFHeavy)"],Vy[[2,3]]]
+
+  Print[TraditionalForm["ZLight = "], countExpDYL ,TraditionalForm[" +- "], errorExpDYL ]
+  Print[TraditionalForm["TTbar = "], countExpTTbar ,TraditionalForm[" +- "], errorExpTTbar ]
+  Print[TraditionalForm["ZHeavy = "], countExpDYB ,TraditionalForm[" +- "], errorExpDYB ]
+  Print[TraditionalForm["ST = "], countSignalCCST ,TraditionalForm[" +- "], errorSignalCCST ]
+  Print[TraditionalForm["VV = "], countSignalCCVV ,TraditionalForm[" +- "], errorSignalCCVV ]
+  Print[TraditionalForm["MCtotal = "],countBackExp,TraditionalForm[" +- "], errorBackExp]
+
+  Print[TraditionalForm["MCtotal without correlation = "],countBackExp,TraditionalForm[" +- "], errorBackExpNoCorr]
+

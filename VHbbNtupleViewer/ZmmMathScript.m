@@ -88,108 +88,32 @@ errorSFTTbar = Sqrt[Vy[[2,2]]]
 errorSFHeavy = Sqrt[Vy[[3,3]]]
 
 
-countLightCCDYL = 1937.12
-countTTbarCCDYL = 0.785351
-countHeavyCCDYL = 13.6845
-countLightCCTTbar  = 1.94897
-countTTbarCCTTbar  = 161.51
-countHeavyCCTTbar  = 11.4636
-countLightCCDYB  = 113.185
-countTTbarCCDYB  = 4.29065
-countHeavyCCDYB  = 95.7915
-countLightCCRest  = 2073.8
-countTTbarCCRest  = 172.912
-countHeavyCCRest  = 147.344
-countSignal115DYL  = 2.0452
-countSignal115TTbar  = 4.79828
-countSignal115DYB  = 22.6904
-countSignal115VV  = 0.916096
-countSignal115ST  = 0.192396
-(*Errors*)
-errorLightCCDYL = 13.5487
-errorTTbarCCDYL = 0.454865
-errorHeavyCCDYL = 1.576
-errorLightCCTTbar  = 0.447124
-errorTTbarCCTTbar  = 3.90231
-errorHeavyCCTTbar  = 0.982999
-errorLightCCDYB  = 3.34908
-errorTTbarCCDYB  = 0.641678
-errorHeavyCCDYB  = 3.932
-errorLightCCRest  = 45.8388
-errorTTbarCCRest  = 13.5165
-errorHeavyCCRest  = 12.289
-errorSignal115DYL  = 0.567236
-errorSignal115TTbar  = 0.685469
-errorSignal115DYB  = 1.89747
-errorSignal115VV  = 0.279913
-errorSignal115ST  = 0.0896013
-
-(*without MC uncert*)
-errorLightCCDYL = 0
-errorTTbarCCDYL = 0
-errorHeavyCCDYL = 0
-errorLightCCTTbar  = 0
-errorTTbarCCTTbar  = 0
-errorHeavyCCTTbar  = 0
-errorLightCCDYB  = 0
-errorTTbarCCDYB  = 0
-errorHeavyCCDYB  = 0
-errorLightCCRest  = Sqrt[2101]
-errorTTbarCCRest  = Sqrt[180]
-errorHeavyCCRest  = Sqrt[151]
-errorSignal115DYL  = 0
-errorSignal115TTbar  = 0
-errorSignal115DYB  = 0
-errorSignal115VV  = 0
-errorSignal115ST  = 0
-
-  (*updated 3.5*)
-countLightCCDYL = 3433.12
-countTTbarCCDYL = 0.795455
-countHeavyCCDYL = 17.2483
-countLightCCTTbar  = 4.71095
-countTTbarCCTTbar  = 171.167
-countHeavyCCTTbar  = 14.3554
-countLightCCDYB  = 207.448
-countTTbarCCDYB  = 6.26514
-countHeavyCCDYB  = 125.035
-countLightCCMc  = 51.9649
-countTTbarCCMc  = 6.15704
-countHeavyCCMc  = 4.50551
-countLightCCData  = 3856
-countTTbarCCData  = 194
-countHeavyCCData  = 175
-countLightCCRest  = 3804.04
-countTTbarCCRest  = 187.843
-countHeavyCCRest  = 170.494
-countSignal115DYL  = 0.000681669
-countSignal115TTbar  = 0.00191257
-countSignal115DYB  = 0.0080876
-Erroring
-errorLightCCDYL = 22.7827
-errorTTbarCCDYL = 0.561444
-errorHeavyCCDYL = 2.22851
-errorLightCCTTbar  = 0.807921
-errorTTbarCCTTbar  = 5.16322
-errorHeavyCCTTbar  = 1.48064
-errorLightCCDYB  = 5.56675
-errorTTbarCCDYB  = 1.06172
-errorHeavyCCDYB  = 5.75329
-errorLightCCMc  = 0.764805
-errorTTbarCCMc  = 0.434616
-errorHeavyCCMc  = 0.180772
-errorLightCCData  = 62.0967
-errorTTbarCCData  = 13.9284
-errorHeavyCCData  = 13.2288
-errorLightCCRest  = 62.1014
-errorTTbarCCRest  = 13.9352
-errorHeavyCCRest  = 13.23
-  (*fakes*)
-errorSignal115DYL  = 0.567236
-errorSignal115TTbar  = 0.685469
-errorSignal115DYB  = 1.89747
-errorSignal115VV  = 0.279913
-errorSignal115ST  = 0.0896013
+(*updated 3.5*)
+countLightCCDYL = 4320.93
+countTTbarCCDYL = 0.48
+countHeavyCCDYL = 17.94
+countLightCCTTbar  = 1.84
+countTTbarCCTTbar  = 189.73
+countHeavyCCTTbar  = 19.02
+countLightCCDYB  = 246.59
+countTTbarCCDYB  = 4.92
+countHeavyCCDYB  = 162.61
+countLightCCRest  = 4323 - ( 0.87 + 38.87 + 23.59 + 0.44 )
+countTTbarCCRest  = 231 - ( 7.41 + 0.33 )
+countHeavyCCRest  =  190 - ( 0.58 + 0.04 + 0.09 + 4.99 )
+  (*Errors*)
+errorLightCCDYL = 25.35
+errorTTbarCCDYL = 0.36
+errorHeavyCCDYL = 2.22
+errorLightCCTTbar  = 0.54
+errorTTbarCCTTbar  = 5.43
+errorHeavyCCTTbar  = 1.72
+errorLightCCDYB  = 6.06
+errorTTbarCCDYB  = 0.95
+errorHeavyCCDYB  = 6.60
+errorLightCCRest  = Sqrt[ (Sqrt[4323])^2 + 0.17^2 + 0.75^2 + 0.34^2 + 0.12^2 ]
+errorTTbarCCRest  = Sqrt[ (Sqrt[231])^2 + 0.5^2 + 0.04^2 ]
+errorHeavyCCRest  = Sqrt[ (Sqrt[190])^2 + 1.72^2 + 0.04^2 + 0.04^2 + 0.15^2 ]
 
  
   Print[TraditionalForm["SFLight = "],SFLight,TraditionalForm[" +- "], errorSFLight]
