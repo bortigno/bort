@@ -88,33 +88,33 @@ errorSFTTbar = Sqrt[Vy[[2,2]]]
 errorSFHeavy = Sqrt[Vy[[3,3]]]
 
 
-(*updated 3.5*)
-countLightCCDYL = 4320.93
-countTTbarCCDYL = 0.48
-countHeavyCCDYL = 17.94
-countLightCCTTbar  = 1.84
-countTTbarCCTTbar  = 189.73
-countHeavyCCTTbar  = 19.02
-countLightCCDYB  = 246.59
-countTTbarCCDYB  = 4.92
-countHeavyCCDYB  = 162.61
-countLightCCRest  = 4323 - ( 0.87 + 38.87 + 23.59 + 0.44 )
-countTTbarCCRest  = 231 - ( 7.41 + 0.33 )
-countHeavyCCRest  =  190 - ( 0.58 + 0.04 + 0.09 + 4.99 )
-  (*Errors*)
-errorLightCCDYL = 25.35
-errorTTbarCCDYL = 0.36
-errorHeavyCCDYL = 2.22
-errorLightCCTTbar  = 0.54
-errorTTbarCCTTbar  = 5.43
-errorHeavyCCTTbar  = 1.72
-errorLightCCDYB  = 6.06
-errorTTbarCCDYB  = 0.95
-errorHeavyCCDYB  = 6.60
-errorLightCCRest  = Sqrt[ (Sqrt[4323])^2 + 0.17^2 + 0.75^2 + 0.34^2 + 0.12^2 ]
-errorTTbarCCRest  = Sqrt[ (Sqrt[231])^2 + 0.5^2 + 0.04^2 ]
-errorHeavyCCRest  = Sqrt[ (Sqrt[190])^2 + 1.72^2 + 0.04^2 + 0.04^2 + 0.15^2 ]
+(*UPDATED WITHOUT JET ID*)
+countTTbarCCDYL = 0.58
+errorTTbarCCDYL = 0.49
+countTTbarCCTTbar  = 243.02
+errorTTbarCCTTbar  = 7.54
+countTTbarCCDYB  = 6.35
+errorTTbarCCDYB  = 1.33
+countTTbarCCRest  = 303.00 - (0.42 + 0.10 + 0.00 + 9.61)
+errorTTbarCCRest  = Sqrt[ (Sqrt[303.00]^2 + 0.05^2 + 0.07^2 + 0.00^2 + 0.70^2)]
 
+countLightCCDYL = 5457.46
+errorLightCCDYL = 34.87
+countLightCCTTbar  = 2.13
+errorLightCCTTbar  = 0.71
+countLightCCDYB  = 315.89
+errorLightCCDYB  = 8.40
+countLightCCRest  = 5514.00 - (29.73 + 1.10 + 48.99 + 0.55)
+errorLightCCRest  = Sqrt[ (Sqrt[5514.00]^2 + 0.46^2 + 0.24^2 + 1.03^2 + 0.17^2 )]
+     
+countHeavyCCDYL = 22.71
+errorHeavyCCDYL = 3.06
+countHeavyCCTTbar  = 24.63
+errorHeavyCCTTbar  = 2.40
+countHeavyCCDYB  = 205.85
+errorHeavyCCDYB  = 9.10
+countHeavyCCRest  = 248.00 - (6.19 + 0.07 + 0.12 + 0.70)
+errorHeavyCCRest  = Sqrt[ (Sqrt[248.00]^2 + 0.21^2 + 0.06^2 + 0.05^2 + 0.19^2 )]
  
   Print[TraditionalForm["SFLight = "],SFLight,TraditionalForm[" +- "], errorSFLight]
   Print[TraditionalForm["SFTTbar = "],SFTTbar,TraditionalForm[" +- "], errorSFTTbar]

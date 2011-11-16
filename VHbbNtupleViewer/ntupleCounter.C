@@ -10,7 +10,7 @@
 #include "TRegexp.h"
 #include <TPad.h>
 #include <TLegend.h>
-
+#include <TCut.h>
 #include "Riostream.h"
 #include "TMatrixD.h"
 #include "TVectorD.h"
@@ -258,19 +258,19 @@ int ntupleCounter( void ){
   //V11    
 //   std::string path("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Oct27th/");
 //   std::string pathData("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Oct27th/");
-  std::string path("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Nov1st/");
-  std::string pathData("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Oct27th/");
+  std::string path("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Nov1st/DiJetPt/");
+  std::string pathData("~/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Oct30th/DiJetPt/");
 
     
   //data
   std::vector<TFile*> dataFileList;
-  std::string file_DoubleElePromptRecoV4(pathData+"BestCSV_DoubleElectron_Run2011A_PromptRecoV4.root");
-  dataFileList.push_back(TFile::Open(file_DoubleElePromptRecoV4.c_str()));
-  std::string file_DoubleEleMay(pathData+"BestCSV_DoubleElectron_Run2011_May10Rereco.root");
+//   std::string file_DoubleElePromptRecoV4(pathData+"DiJetPt_DoubleElectron_Run2011A_PromptRecoV4.root");
+//   dataFileList.push_back(TFile::Open(file_DoubleElePromptRecoV4.c_str()));
+  std::string file_DoubleEleMay(pathData+"DiJetPt_DoubleElectron_Run2011_May10Rereco.root");
   dataFileList.push_back(TFile::Open(file_DoubleEleMay.c_str()));
-  std::string file_DoubleEleAug(pathData+"BestCSV_DoubleElectron_Run2011A_Aug05ReReco.root");
+  std::string file_DoubleEleAug(pathData+"DiJetPt_DoubleElectron_Run2011A_Aug05ReReco.root");
   dataFileList.push_back(TFile::Open(file_DoubleEleAug.c_str()));
-  std::string file_DoubleElePromptRecoV6(pathData+"BestCSV_DoubleElectron_Run2011A_PromptRecoV6.root");
+  std::string file_DoubleElePromptRecoV6(pathData+"DiJetPt_DoubleElectron_Run2011A_PromptRecoV6.root");
   dataFileList.push_back(TFile::Open(file_DoubleElePromptRecoV6.c_str()));
 
   //for sample7
@@ -285,23 +285,40 @@ int ntupleCounter( void ){
   //   std::string file_WJETS(path+"TestWJetsToLNu_TuneZ2_7TeV-madgraph-tauola_HBB_EDMNtupleV9_ProcV1.root");
   //   //  std::string file_ST(path+"");
 
-  //for oct5Ntuple
-  std::string file_ZH115(path+"BestCSV_ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp.root");
-  std::string file_DY(path+"BestCSV_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root");
-  std::string file_DYBOOST(path+"BestCSV_DYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola.root");
-  std::string file_ZZ(path+"BestCSV_ZZ_TuneZ2_7TeV_pythia6_tauola.root");
-  std::string file_WZ(path+"BestCSV_WZ_TuneZ2_7TeV_pythia6_tauola.root");
-  std::string file_WW(path+"BestCSV_WW_TuneZ2_7TeV_pythia6_tauola.root");
-  std::string file_TTbar(path+"BestCSV_TTJets_TuneZ2_7TeV-madgraph-tauola.root");
-  std::string file_T_schannel (path+"BestCSV_T_TuneZ2_s-channel_7TeV-powheg-tauola.root");
-  std::string file_T_tchannel (path+"BestCSV_T_TuneZ2_t-channel_7TeV-powheg-tauola.root");
-  std::string file_T_tWchannel (path+"BestCSV_T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola.root");
-  std::string file_Tbar_schannel (path+"BestCSV_Tbar_TuneZ2_s-channel_7TeV-powheg-tauola.root");
-  std::string file_Tbar_tchannel (path+"BestCSV_Tbar_TuneZ2_t-channel_7TeV-powheg-tauola.root");
-  std::string file_Tbar_tWchannel (path+"BestCSV_Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola.root");
+//   //Summer11
+  std::string file_ZH115(path+"DiJetPt_ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp.root");
+  std::string file_DY(path+"DiJetPt_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root");
+//   std::string file_DYBOOST(path+"DiJetPt_DYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola.root");
+//   std::string file_ZZ(path+"DiJetPt_ZZ_TuneZ2_7TeV_pythia6_tauola.root");
+//   std::string file_WZ(path+"DiJetPt_WZ_TuneZ2_7TeV_pythia6_tauola.root");
+  std::string file_WW(path+"DiJetPt_WW_TuneZ2_7TeV_pythia6_tauola.root");
+//   std::string file_TTbar(path+"DiJetPt_TTJets_TuneZ2_7TeV-madgraph-tauola.root");
+//   std::string file_T_schannel (path+"DiJetPt_T_TuneZ2_s-channel_7TeV-powheg-tauola.root");
+  std::string file_T_tchannel (path+"DiJetPt_T_TuneZ2_t-channel_7TeV-powheg-tauola.root");
+//   std::string file_T_tWchannel (path+"DiJetPt_T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola.root");
+//   std::string file_Tbar_schannel (path+"DiJetPt_Tbar_TuneZ2_s-channel_7TeV-powheg-tauola.root");
+//   std::string file_Tbar_tchannel (path+"DiJetPt_Tbar_TuneZ2_t-channel_7TeV-powheg-tauola.root");
+  std::string file_Tbar_tWchannel (path+"DiJetPt_Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola.root");
+//   //forW
+//   std::string file_WJETS(path+"DiJetPt_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola.root");
+
+  //Fall11
+  //  std::string file_ZH115(path+"DiJetPt_ZH_ZToLL_HToBB_M-115_7TeV-powheg-herwigpp_Fall11.root");
+  //  std::string file_DY(path+"DiJetPt_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Fall11.root");
+  std::string file_DYBOOST(path+"DiJetPt_DYJetsToLL_PtZ-100_TuneZ2_7TeV-madgraph-tauola_Fall11.root");
+  std::string file_ZZ(path+"DiJetPt_ZZ_TuneZ2_7TeV_pythia6_tauola_Fall11.root");
+  std::string file_WZ(path+"DiJetPt_WZ_TuneZ2_7TeV_pythia6_tauola_Fall11.root");
+  //  std::string file_WW(path+"DiJetPt_WW_TuneZ2_7TeV_pythia6_tauola_Fall11.root");
+  std::string file_TTbar(path+"DiJetPt_TTJets_TuneZ2_7TeV-madgraph-tauola_Fall11.root");
+  std::string file_T_schannel (path+"DiJetPt_T_TuneZ2_s-channel_7TeV-powheg-tauola_Fall11.root");
+  //  std::string file_T_tchannel (path+"DiJetPt_T_TuneZ2_t-channel_7TeV-powheg-tauola_Fall11.root");
+  std::string file_T_tWchannel (path+"DiJetPt_T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Fall11.root");
+  std::string file_Tbar_schannel (path+"DiJetPt_Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Fall11.root");
+  std::string file_Tbar_tchannel (path+"DiJetPt_Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Fall11.root");
+  //  std::string file_Tbar_tWchannel (path+"DiJetPt_Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Fall11.root");
   //forW
-  std::string file_WJETS(path+"BestCSV_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola.root");
-  //  std::string file_ST(path+"");
+  std::string file_WJETS(path+"DiJetPt_WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Fall11.root");
+
 
   std::vector<TFile *> signalFileList, bkgFileList, DYfileList;
   std::vector<double> signalxsec,bkgxsec,DYxsec;
@@ -392,9 +409,16 @@ int ntupleCounter( void ){
   std::cout << Count->GetBinContent(1) << std::endl;
   std::cout << Tbar_tWchannelMC_normalisation << std::endl;
 
+
+
   //for 0ct9
   Double_t ZeeL=215.094+930.228+370.915+662.967;
   Double_t ZmmL=215.094+930.228+370.915+662.967;
+
+  //without V4
+  ZeeL=215.094+370.915+662.967;
+  ZmmL=215.094+370.915+662.967;
+  
   //   ZeeL=215.094+930.228;
   //   ZmmL=215.094+930.228;
 
@@ -442,17 +466,18 @@ int ntupleCounter( void ){
 //   TCut HeavyCC_weights("btag1T2CSF*PUweight*weightTrig");
 //   TCut HeavyCC_cutString("(hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & (H.mass < 90. | H.mass > 145.) & V.mass > 75. & V.mass < 105 & ((hJet_csv[0] > 0.898 & hJet_csv[1] > 0.5) | (hJet_csv[0] > 0.5 & hJet_csv[1] > 0.898)) & Sum$(aJet_pt > 20 & abs(aJet_eta) < 2.4) < 2. & abs( HVdPhi ) > 2.9 & V.pt < 100. & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] ))");
 
+
 //2011 LightCC
   TCut LightCC_weights("btagA0TSF*PUweight*weightTrig");
-  TCut LightCC_cutString("H.mass < 300. & hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & V.pt > 100. & H.pt > 100. & abs( HVdPhi ) > 2.9 & Sum$(aJet_pt > 20 & abs(aJet_eta) < 2.4) < 2. & V.mass > 75. & V.mass < 105 & !(hJet_csv[0] > 0.898 | hJet_csv[1] > 0.898) & H.mass < 300. & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
+  TCut LightCC_cutString("hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & V.pt > 100. & H.pt > 100. & abs( HVdPhi ) > 2.9 & Sum$(aJet_pt > 20 & abs(aJet_eta) < 2.4) < 2. & V.mass > 75. & V.mass < 105 & !(hJet_csv[0] > 0.898 | hJet_csv[1] > 0.898) & H.mass < 250. & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
 
   //2011 TTbarCC
   TCut TTbarCC_weights("btag1T2CSF*PUweight*weightTrig");
-  TCut TTbarCC_cutString("H.mass < 300 & hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & H.pt > 100. & ((hJet_csv[0] > 0.898 & hJet_csv[1] > 0.5) | (hJet_csv[0] > 0.5 & hJet_csv[1] > 0.898)) & (V.mass > 105 | V.mass < 75.) & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
+  TCut TTbarCC_cutString("H.mass < 250 & hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & H.pt > 100. & ((hJet_csv[0] > 0.898 & hJet_csv[1] > 0.5) | (hJet_csv[0] > 0.5 & hJet_csv[1] > 0.898)) & (V.mass > 105 | V.mass < 75.) & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
 
   //2011 HeavyCC
   TCut HeavyCC_weights("btag1T2CSF*PUweight*weightTrig");
-  TCut HeavyCC_cutString("H.mass < 300 & hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & (H.mass < 90. | H.mass > 145.) & V.mass > 75. & V.mass < 105 & ((hJet_csv[0] > 0.898 & hJet_csv[1] > 0.5) | (hJet_csv[0] > 0.5 & hJet_csv[1] > 0.898)) & Sum$(aJet_pt > 20 & abs(aJet_eta) < 2.4) < 2. & abs( HVdPhi ) > 2.9 & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
+  TCut HeavyCC_cutString("H.mass < 250 & hJet_pt[0] > 20. & hJet_pt[1] > 20. & EVENT.json & hbhe & (H.mass < 90. | H.mass > 145.) & V.mass > 75. & V.mass < 105 & ((hJet_csv[0] > 0.898 & hJet_csv[1] > 0.5) | (hJet_csv[0] > 0.5 & hJet_csv[1] > 0.898)) & Sum$(aJet_pt > 20 & abs(aJet_eta) < 2.4) < 2. & abs( HVdPhi ) > 2.9 & Vtype == 1 & ( triggerFlags[5] | triggerFlags[6] )");
 
   //2011 Signal
   TCut Signal115_weights("btag1T2CSF*PUweight*weightTrig");
@@ -547,7 +572,7 @@ int ntupleCounter( void ){
     //only for TTbar
     if(rizziSysTTbar == true && iFile==0){
       std::cout << "is this ttbar??? = " << bkgFileList.at(iFile)->GetName() << std::endl;
-      rizzySysErr=0.2;
+      rizziSysErr=0.2;
       e_countLightCC.at(iFile+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countLightCC.at(iFile+signalFileList.size()),2) + TMath::Power( rizziSysErr*countLightCC.at(iFile+signalFileList.size()),2));
       e_countTTbarCC.at(iFile+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countTTbarCC.at(iFile+signalFileList.size()),2) + TMath::Power( rizziSysErr*countTTbarCC.at(iFile+signalFileList.size()),2));
       e_countHeavyCC.at(iFile+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countHeavyCC.at(iFile+signalFileList.size()),2) + TMath::Power( rizziSysErr*countHeavyCC.at(iFile+signalFileList.size()),2));
@@ -640,7 +665,7 @@ int ntupleCounter( void ){
 
 
       if(rizziSysDYB){
-	rizzySysErr=0.5;
+	rizziSysErr=0.5;
 	e_countLightCC.at(1+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countLightCC.at(1+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countLightCC.at(1+bkgFileList.size()+signalFileList.size()),2));
 	e_countTTbarCC.at(1+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countTTbarCC.at(1+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countTTbarCC.at(1+bkgFileList.size()+signalFileList.size()),2));
 	e_countHeavyCC.at(1+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countHeavyCC.at(1+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countHeavyCC.at(1+bkgFileList.size()+signalFileList.size()),2));
@@ -722,7 +747,7 @@ int ntupleCounter( void ){
 
 
       if(rizziSysDYB){
-	rizzySysErr=0.5;
+	rizziSysErr=0.5;
 	e_countLightCC.at(3+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countLightCC.at(3+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countLightCC.at(3+bkgFileList.size()+signalFileList.size()),2));
 	e_countTTbarCC.at(3+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countTTbarCC.at(3+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countTTbarCC.at(3+bkgFileList.size()+signalFileList.size()),2));
 	e_countHeavyCC.at(3+bkgFileList.size()+signalFileList.size()) = TMath::Sqrt( TMath::Power(e_countHeavyCC.at(3+bkgFileList.size()+signalFileList.size()),2) + TMath::Power( rizziSysErr*countHeavyCC.at(3+bkgFileList.size()+signalFileList.size()),2));

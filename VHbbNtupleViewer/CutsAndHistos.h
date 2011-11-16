@@ -6,6 +6,7 @@
 #include <TROOT.h>
 #include <TFile.h>
 #include "ntupleReader.h"
+#include "samples.h"
 
 enum  VType{ Zmm, Zee, Wmn, Wen, Znn } iType;
 
@@ -19,6 +20,15 @@ public:
 class Cut {
  public:
   virtual bool pass( ntupleReader &event ) = 0;
+   virtual std::string name() = 0;
+   virtual bool operator()(ntupleReader &event) {return pass(event); }
+};
+
+class CutSample : public Cut {
+ public:
+  virtual bool pass( ntupleReader &event ) = 0;
+  virtual bool pass( ntupleReader &event, Sample &sample ) = 0;
+  virtual double weight( ntupleReader &event, Sample &sample ) = 0;
    virtual std::string name() = 0;
    virtual bool operator()(ntupleReader &event) {return pass(event); }
 };
@@ -109,6 +119,7 @@ public:
     cut(c) {
        histos.push_back(h);
    }
+
   //TODO: implement destructor for all pointers received
   
   void book(TFile &f) {
@@ -123,7 +134,6 @@ public:
       for(size_t i=0; i< histos.size(); i++) 
 	histos.at(i)->fill(event,w);
   }
-
   
   Cut * cut;
   std::vector<Histos *> histos;

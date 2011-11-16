@@ -10,13 +10,13 @@
 #define CSVM 0.679
 #define CSVL 0.244
 #define CSVT 0.898
-#define fA 0.614603
-#define fB 0.385397
+#define fA 0.46502
+#define fB 0.53498
 
 // New implementations of the control region
 // The signal regions must be implemented incrementally since cutflow is needed
 
-class VlightRegionVmassRelaxedHZee: public Cut {
+class VlightRegionVmassRelaxedHZee: public CutSample {
 
   std::string name() {return "VlightRegionVmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
@@ -56,7 +56,7 @@ class VlightRegionVmassRelaxedHZee: public Cut {
 };
 
 
-class TTbarRegionVmassRelaxedHZee: public Cut {
+class TTbarRegionVmassRelaxedHZee: public CutSample {
   std::string name() {return "TTbarRegionVmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -91,8 +91,49 @@ class TTbarRegionVmassRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if( sample.data ) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
+class oldTTbarRegionVmassRelaxedHZee: public CutSample {
+  std::string name() {return "oldTTbarRegionHZee";};
+ public:
+  Bool_t pass(ntupleReader &p){
+    return( p.Vtype == 1 
+	    && p.MET_et > 50.
+	    && p.hJet_pt[0] > 20.
+	    && p.hJet_pt[1] > 20.
+	    && p.EVENT_json == true
+	    && p.hbhe == true
+	    && ( p.triggerFlags[5] || p.triggerFlags[6] )  );
+  }
+  Bool_t pass(ntupleReader &p, Sample &sample){
+    bool sampleCut = false;
+    bool boost = false;
+    bool isB = false;
+    if(p.genZpt >= 120)
+      boost = true;
+    if(p.eventFlav == 5)
+      isB = true;
+    std::string DY("DY");
+    std::string DYBOOSTED("DYBOOSTED");
+    if( sample.name == DY && !boost )
+      sampleCut = true;
+    else if( sample.name == DYBOOSTED && boost )
+      sampleCut = true;
+    else if( sample.name != DY && sample.name != DYBOOSTED )
+      sampleCut = true;
+    else sampleCut = false;
+    return( sampleCut == true 
+	    && p.Vtype == 1 
+	    && p.MET_et > 50.
+	    && p.hJet_pt[0] > 20.
+	    && p.hJet_pt[1] > 20.
+	    && p.EVENT_json == true
+	    && p.hbhe == true
+	    && ( p.triggerFlags[5] || p.triggerFlags[6] )  );
+  }
+  double weight(ntupleReader &p, Sample &sample) {if( sample.data ) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
+};
 
-class VbbRegionVmassRelaxedHZee: public Cut {
+
+class VbbRegionVmassRelaxedHZee: public CutSample {
   std::string name() {return "VbbRegionVmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -136,7 +177,7 @@ class VbbRegionVmassRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
-class SignalRegionVmassRelaxedHZee: public Cut{
+class SignalRegionVmassRelaxedHZee: public CutSample{
   std::string name() {return "SignalRegionVmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample & sample){
@@ -174,7 +215,7 @@ class SignalRegionVmassRelaxedHZee: public Cut{
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }      
 };
 
-class BDTRegionVmassRelaxedHZee: public Cut{
+class BDTRegionVmassRelaxedHZee: public CutSample{
   std::string name() {return "BDTRegionVmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){

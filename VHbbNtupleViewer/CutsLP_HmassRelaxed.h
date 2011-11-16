@@ -10,13 +10,13 @@
 #define CSVM 0.679
 #define CSVL 0.244
 #define CSVT 0.898
-#define fA 0.614603
-#define fB 0.385397
+#define fA 0.46502
+#define fB 0.53498
 
 // New implementations of the control region
 // The signal regions must be implemented incrementally since cutflow is needed
 
-class VlightRegionHmassRelaxedHZee: public Cut {
+class VlightRegionHmassRelaxedHZee: public CutSample {
   std::string name() {return "VlightRegionHmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -56,7 +56,7 @@ class VlightRegionHmassRelaxedHZee: public Cut {
 };
 
 
-class TTbarRegionHmassRelaxedHZee: public Cut {
+class TTbarRegionHmassRelaxedHZee: public CutSample {
   std::string name() {return "TTbarRegionHmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -93,7 +93,7 @@ class TTbarRegionHmassRelaxedHZee: public Cut {
 };
 
 
-class VbbRegionHmassRelaxedHZee: public Cut {
+class VbbRegionHmassRelaxedHZee: public CutSample {
   std::string name() {return "VbbRegionHmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -138,7 +138,7 @@ class VbbRegionHmassRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
-class SignalRegionHmassRelaxedHZee: public Cut{
+class SignalRegionHmassRelaxedHZee: public CutSample{
   std::string name() {return "SignalRegionHmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample & sample){
@@ -178,7 +178,7 @@ class SignalRegionHmassRelaxedHZee: public Cut{
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }      
 };
 
-class BDTRegionHmassRelaxedHZee: public Cut{
+class BDTRegionHmassRelaxedHZee: public CutSample{
   std::string name() {return "BDTRegionHmassRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){

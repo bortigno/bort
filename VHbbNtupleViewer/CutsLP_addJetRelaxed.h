@@ -10,13 +10,13 @@
 #define CSVM 0.679
 #define CSVL 0.244
 #define CSVT 0.898
-#define fA 0.614603
-#define fB 0.385397
+#define fA 0.46502
+#define fB 0.53498
 
 // New implementations of the control region
 // The signal regions must be implemented incrementally since cutflow is needed
 
-class VlightRegionAddJetRelaxedHZee: public Cut {
+class VlightRegionAddJetRelaxedHZee: public CutSample {
 
   std::string name() {return "VlightRegionAddJetRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
@@ -57,7 +57,7 @@ class VlightRegionAddJetRelaxedHZee: public Cut {
 };
 
 
-class TTbarRegionAddJetRelaxedHZee: public Cut {
+class TTbarRegionAddJetRelaxedHZee: public CutSample {
   std::string name() {return "TTbarRegionAddJetRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -95,7 +95,7 @@ class TTbarRegionAddJetRelaxedHZee: public Cut {
 };
 
 
-class VbbRegionAddJetRelaxedHZee: public Cut {
+class VbbRegionAddJetRelaxedHZee: public CutSample {
   std::string name() {return "VbbRegionAddJetRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -140,7 +140,7 @@ class VbbRegionAddJetRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
-class SignalRegionAddJetRelaxedHZee: public Cut{
+class SignalRegionAddJetRelaxedHZee: public CutSample{
   std::string name() {return "SignalRegionAddJetRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample & sample){
@@ -179,7 +179,7 @@ class SignalRegionAddJetRelaxedHZee: public Cut{
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }      
 };
 
-class BDTRegionAddJetRelaxedHZee: public Cut{
+class BDTRegionAddJetRelaxedHZee: public CutSample{
   std::string name() {return "BDTRegionAddJetRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){

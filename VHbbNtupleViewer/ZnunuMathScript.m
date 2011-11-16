@@ -1,3 +1,68 @@
+(* ::Package:: *)
+
+ClearAll["Global`*"];
+$Assumptions{ countZLightCCDYL \[Element] Reals,
+countZLightCCWL \[Element] Reals,
+countZLightCCTTbar \[Element] Reals,
+countZLightCCTTbar \[Element] Reals,
+countZLightCCWB \[Element] Reals,
+countWLightCCDYL \[Element] Reals,
+countWLightCCWL \[Element] Reals,
+countWLightCCTTbar \[Element] Reals,
+countWLightCCDYB \[Element] Reals,
+countWLightCCWB \[Element] Reals,
+countTTbarCCDYL \[Element] Reals,
+countTTbarCCWL \[Element] Reals,
+countTTbarCCTTbar \[Element] Reals,
+countTTbarCCDYB \[Element] Reals,
+countTTbarCCWB \[Element] Reals,
+countZHeavyCCDYL \[Element] Reals,
+countZHeavyCCWL \[Element] Reals,
+countZHeavyCCTTbar \[Element] Reals,
+countZHeavyCCDYB \[Element] Reals,
+countZHeavyCCWB \[Element] Reals,
+countWHeavyCCDYL \[Element] Reals,
+countWHeavyCCWL \[Element] Reals,
+countWHeavyCCWL \[Element] Reals,
+countWHeavyCCDYB \[Element] Reals, 
+countWHeavyCCWB \[Element] Reals,
+countZLightCCRest \[Element] Reals,
+countWLightCCRest \[Element] Reals,
+countTTbarCCRest \[Element] Reals,
+countZHeavyCCRest \[Element] Reals,
+countWHeavyCCRest \[Element] Reals };
+
+$Assumptions{ countZLightCCDYL >0,
+countZLightCCWL >0,
+countZLightCCTTbar >0,
+countZLightCCTTbar >0,
+countZLightCCWB >0,
+countWLightCCDYL >0,
+countWLightCCWL >0,
+countWLightCCTTbar >0,
+countWLightCCDYB >0,
+countWLightCCWB >0,
+countTTbarCCDYL >0,
+countTTbarCCWL >0,
+countTTbarCCTTbar >0,
+countTTbarCCDYB >0,
+countTTbarCCWB >0,
+countZHeavyCCDYL >0,
+countZHeavyCCWL >0,
+countZHeavyCCTTbar >0,
+countZHeavyCCDYB >0,
+countZHeavyCCWB >0,
+countWHeavyCCDYL >0,
+countWHeavyCCWL >0,
+countWHeavyCCWL >0,
+countWHeavyCCDYB >0, 
+countWHeavyCCWB >0,
+countZLightCCRest >0,
+countWLightCCRest >0,
+countTTbarCCRest >0,
+countZHeavyCCRest >0,
+countWHeavyCCRest >0 };
+
 m = { { countZLightCCDYL , countZLightCCWL , countZLightCCTTbar   , countZLightCCDYB , countZLightCCWB   },
       { countWLightCCDYL , countWLightCCWL , countWLightCCTTbar   , countWLightCCDYB , countWLightCCWB   },
       { countTTbarCCDYL , countTTbarCCWL , countTTbarCCTTbar   , countTTbarCCDYB , countTTbarCCWB   },
@@ -298,3 +363,6 @@ Print[TraditionalForm["Cov(SFWHeavy,SFZLight)"],Vy[[5,1]]];
 Print[TraditionalForm["Cov(SFWHeavy,SFZHeavy)"],Vy[[5,2]]];
 Print[TraditionalForm["Cov(SFWHeavy,SFTTbar)"],Vy[[5,3]]];
 Print[TraditionalForm["Cov(SFWHeavy,SFWLight)"],Vy[[5,4]]];
+
+
+

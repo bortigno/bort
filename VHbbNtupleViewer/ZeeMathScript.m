@@ -139,6 +139,45 @@ errorSignalCCTTbar  = 1.07914
 errorSignalCCDYB  = 2.86414
 errorSignalCCST  = 0.0971739
 errorSignalCCVV  = 0.362826
+
+  (*full dataset*)
+  (* Counts *)
+countLightCCDYL = 4551.01
+countTTbarCCDYL = 1.14371
+countHeavyCCDYL = 21.75
+countLightCCTTbar  = 6.07954
+countTTbarCCTTbar  = 228.595
+countHeavyCCTTbar  = 19.1901
+countLightCCDYB  = 271.663
+countTTbarCCDYB  = 8.37037
+countHeavyCCDYB  = 165.804
+countLightCCRest  = 4909.99
+countTTbarCCRest  = 243.315
+countHeavyCCRest  = 206.186
+  (* Errors *)
+errorLightCCDYL = 30.0142
+errorTTbarCCDYL = 0.820014
+errorHeavyCCDYL = 2.8006
+errorLightCCTTbar  = 1.05831
+errorTTbarCCTTbar  = 6.81843
+errorHeavyCCTTbar  = 1.97931
+errorLightCCDYB  = 7.25561
+errorTTbarCCDYB  = 1.37281
+errorHeavyCCDYB  = 7.53603
+errorLightCCRest  = 73.4859
+errorTTbarCCRest  = 16.2794
+errorHeavyCCRest  = 14.6459
+  (* For signal region *)
+countSignalCCDYL = 3.34487
+countSignalCCTTbar  = 9.226
+countSignalCCDYB  = 42.1396
+countSignalCCST  = 0.187373
+countSignalCCVV  = 1.51848
+errorSignalCCDYL = 1.18259
+errorSignalCCTTbar  = 1.47734
+errorSignalCCDYB  = 4.09296
+errorSignalCCST  = 0.116273
+errorSignalCCVV  = 0.466093
  
   Print[TraditionalForm["SFLight = "],SFLight,TraditionalForm[" +- "], errorSFLight]
   Print[TraditionalForm["SFTTbar = "],SFTTbar,TraditionalForm[" +- "], errorSFTTbar]

@@ -10,13 +10,13 @@
 #define CSVM 0.679
 #define CSVL 0.244
 #define CSVT 0.898
-#define fA 0.614603
-#define fB 0.385397
+#define fA 0.46502
+#define fB 0.53498
 
 // New implementations of the control region
 // The signal regions must be implemented incrementally since cutflow is needed
 
-class VlightRegionPtRelaxedHZee: public Cut {
+class VlightRegionPtRelaxedHZee: public CutSample {
 
   std::string name() {return "VlightRegionPtRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
@@ -56,7 +56,7 @@ class VlightRegionPtRelaxedHZee: public Cut {
 };
 
 
-class TTbarRegionPtRelaxedHZee: public Cut {
+class TTbarRegionPtRelaxedHZee: public CutSample {
   std::string name() {return "TTbarRegionPtRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -92,8 +92,7 @@ class TTbarRegionPtRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if( sample.data ) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
-
-class VbbRegionPtRelaxedHZee: public Cut {
+class VbbRegionPtRelaxedHZee: public CutSample {
   std::string name() {return "VbbRegionPtRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
@@ -137,7 +136,7 @@ class VbbRegionPtRelaxedHZee: public Cut {
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }
 };
 
-class SignalRegionPtRelaxedHZee: public Cut{
+class SignalRegionPtRelaxedHZee: public CutSample{
   std::string name() {return "SignalRegionPtRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample & sample){
@@ -175,7 +174,7 @@ class SignalRegionPtRelaxedHZee: public Cut{
   double weight(ntupleReader &p, Sample &sample) {if(sample.data) return 1; else return ((fA*p.PUweight+fB*p.PUweight2011B)*p.weightTrig); }      
 };
 
-class BDTRegionPtRelaxedHZee: public Cut{
+class BDTRegionPtRelaxedHZee: public CutSample{
   std::string name() {return "BDTRegionPtRelaxedHZee";};
  public: Bool_t pass(ntupleReader &p){ return true;}
   Bool_t pass(ntupleReader &p, Sample &sample){
