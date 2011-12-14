@@ -19,7 +19,8 @@ void plottingmacro()
   bool debug_ = true;
 
   //  std::string path("Nov10thFall11Plots/");
-  std::string path("Nov10Fall1160MTopSlimPlots/");
+  //  std::string path("Nov10Fall1160MTopSlimPlots/");
+  std::string path("Nov10Fall1160MTopIVFPlots/");
 
   if(debug_)
     std::cout << "Init the style form setTDRStyle" << std::endl;
@@ -30,7 +31,9 @@ void plottingmacro()
   if(debug_)
     std::cout << "Init the sample" << std::endl;
   //  std::vector<Sample> s = Nov10thDiJetPtUpdatedSlimHistos();
-  std::vector<Sample> s = Nov10Fall1160MTopSlimHistos();
+  //  std::vector<Sample> s = Nov10Fall1160MTopSlimHistos();
+  std::vector<Sample> s = Nov10Fall1160MTopIVFHistos();
+
   Sample data(1,"fake data","S1.root",0,true,1000);
 
   if(debug_)
