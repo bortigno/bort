@@ -58,15 +58,21 @@ class fitInfo{
     cr_signal->init();
     s_regionString = s_prefix+s_region+"ControlRegionHZee/"+s_var+s_prefix+s_region+"ControlRegionHZee$";
     s_regionForSyst = s_sysprefix+s_region+"ControlRegionHZee/"+s_var+s_sysprefix+s_region+"ControlRegionHZee"+s_suffix;
-    s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
+    if(s_sysprefix != "")
+      s_signalRegion=s_sysprefix+"RegionHZee/SimpleJet1_phi"+s_sysprefix+"RegionHZee$";
+    else
+      s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
   };
   fitInfo(std::string & region, std::string & var, std::string & prefix, std::string & sysprefix , std::string & suffix , double min_, double max_ )
-    :s_region(region), s_var(var), s_prefix(prefix), s_sysprefix(prefix), s_suffix(suffix), min(min_), max(max_),cr(new controlRegion), cr_signal( new controlRegion) {
+    :s_region(region), s_var(var), s_prefix(prefix), s_sysprefix(sysprefix), s_suffix(suffix), min(min_), max(max_),cr(new controlRegion), cr_signal( new controlRegion) {
     cr->init();
     cr_signal->init();
     s_regionString = s_prefix+s_region+"ControlRegionHZee/"+s_var+s_prefix+s_region+"ControlRegionHZee$";
     s_regionForSyst = s_sysprefix+s_region+"ControlRegionHZee/"+s_var+s_sysprefix+s_region+"ControlRegionHZee"+s_suffix;
-    s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
+    if(s_sysprefix != "")
+      s_signalRegion=s_sysprefix+"RegionHZee/SimpleJet1_phi"+s_sysprefix+"RegionHZee$";
+    else
+      s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
   };
   ~fitInfo() {};
 
@@ -87,7 +93,10 @@ class fitInfo{
     cr_signal->init();
     s_regionString = s_prefix+s_region+"ControlRegionHZee/"+s_var+s_prefix+s_region+"ControlRegionHZee$";
     s_regionForSyst = s_sysprefix+s_region+"ControlRegionHZee/"+s_var+s_sysprefix+s_region+"ControlRegionHZee"+s_suffix;
-    s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
+    if(s_sysprefix != "")
+      s_signalRegion=s_sysprefix+"RegionHZee/SimpleJet1_phi"+s_sysprefix+"RegionHZee$";
+    else
+      s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
   }
 
   RooRealVar *var;

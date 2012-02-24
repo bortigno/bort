@@ -54,7 +54,7 @@ class BDTSystJecUPRegionHZee: public CutSample{
 	     && p.H_jecUP().Pt() > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecUP().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -99,7 +99,7 @@ class BDTSystJecUPZbbControlRegionHZee: public CutSample{
 	     && p.hJet_csv[1] > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecUP().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -144,7 +144,7 @@ class BDTSystJecUPZlightControlRegionHZee: public CutSample{
 	     && p.hJet_csv[1] < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecUP().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -239,7 +239,7 @@ class BDTSystJecDOWNRegionHZee: public CutSample{
 	     && p.H_jecDOWN().Pt() > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecDOWN().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -285,7 +285,7 @@ class BDTSystJecDOWNZbbControlRegionHZee: public CutSample{
 	     && p.hJet_csv[1] > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecDOWN().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -330,7 +330,7 @@ class BDTSystJecDOWNZlightControlRegionHZee: public CutSample{
 	     && p.hJet_csv[1] < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_jecDOWN().M() < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -425,7 +425,7 @@ class BDTSystBtagUPRegionHZee: public CutSample{
 	     && p.H_pt > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -470,7 +470,7 @@ class BDTSystBtagUPZbbControlRegionHZee: public CutSample{
 	     && hJet_csv_1 > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -515,7 +515,7 @@ class BDTSystBtagUPZlightControlRegionHZee: public CutSample{
 	     && hJet_csv_1 < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -610,7 +610,7 @@ class BDTSystBtagDOWNRegionHZee: public CutSample{
 	     && p.H_pt > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -656,7 +656,7 @@ class BDTSystBtagDOWNZbbControlRegionHZee: public CutSample{
 	     && hJet_csv_1 > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -701,7 +701,7 @@ class BDTSystBtagDOWNZlightControlRegionHZee: public CutSample{
 	     && hJet_csv_1 < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -782,8 +782,8 @@ class BDTSystBtagFUPRegionHZee: public CutSample{
       hJet_csv_0 = p.hJet_csv[0]; 
       hJet_csv_1 = p.hJet_csv[1];
     }else{
-      hJet_csv_0 = p.hJet_csvUp[0]; 
-      hJet_csv_1 = p.hJet_csvUp[1];
+      hJet_csv_0 = p.hJet_csv_cFUP(0); 
+      hJet_csv_1 = p.hJet_csv_cFUP(1);
     }
     return ( sampleCut == true
 	     && p.Vtype == 1
@@ -794,7 +794,7 @@ class BDTSystBtagFUPRegionHZee: public CutSample{
 	     && p.H_pt > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -839,7 +839,7 @@ class BDTSystBtagFUPZbbControlRegionHZee: public CutSample{
 	     && hJet_csv_1 > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -884,7 +884,7 @@ class BDTSystBtagFUPZlightControlRegionHZee: public CutSample{
 	     && hJet_csv_1 < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -979,7 +979,7 @@ class BDTSystBtagFDOWNRegionHZee: public CutSample{
 	     && p.H_pt > 100. 
 	     && p.V_pt > 100. 
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -1025,7 +1025,7 @@ class BDTSystBtagFDOWNZbbControlRegionHZee: public CutSample{
 	     && hJet_csv_1 > CSVL
 	     && p.V_pt < 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }
@@ -1070,7 +1070,7 @@ class BDTSystBtagFDOWNZlightControlRegionHZee: public CutSample{
 	     && hJet_csv_1 < CSVL
 	     && p.V_pt > 100.
 	     && p.V_mass > 75. 
-	     && p.V_mass < 105 
+	     && p.V_mass < 105 && p.H_mass < 250 
 	     //	     && p.CountAddJets() < 2 
 	     && ( p.triggerFlags[5] || p.triggerFlags[6] ) );
   }

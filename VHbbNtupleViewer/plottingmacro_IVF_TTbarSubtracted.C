@@ -13,7 +13,7 @@
 #include "TGraphErrors.h"
 #include "TAxis.h"
 
-void plottingmacro_IVF()
+void plottingmacro_IVF_TTbarSubtracted()
 {
 
 
@@ -23,7 +23,7 @@ void plottingmacro_IVF()
 
   //  std::string path("Nov10thFall11Plots/");
   //  std::string path("Nov10Fall1160MTopSlimPlots/");
-  std::string path("Nov10Fall1160MTopIVFPlots_b/");
+  std::string path("Nov10Fall1160MTopIVFTTbarSubtractedPlots_b/");
 
   if(debug_)
     std::cout << "Init the style form setTDRStyle" << std::endl;
@@ -38,6 +38,7 @@ void plottingmacro_IVF()
   //  std::vector<Sample> s = Nov10thDiJetPtUpdatedSlimHistos();
   //std::vector<Sample> s = Nov10Fall1160MTopSlimHistos();
   std::vector<Sample> s = Nov10Fall1160MTopIVFHistos();
+  //  std::vector<Sample> s = Nov10Fall1160MTopIVFUpdatedHistos();
 
   Sample data(1,"fake data","S1.root",0,true,1000);
 
@@ -90,12 +91,10 @@ void plottingmacro_IVF()
       //      if(!n.Contains(TRegexp("VlightRegionHZee/HiggsPtVlightRegionHZee"))) continue;
       //      if(!n.Contains(TRegexp("VlightRegionHZee/ZPtVlightRegionHZee"))) continue;
       //      if(!n.Contains(TRegexp("VlightRegionHZee"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZmmSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZeeSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZcombSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVPureRegionZcombSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVTTbarPureRegionZcombSV"))) continue;
-      if(!n.Contains(TRegexp("TTbarRegionZeeSVJets"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZmm"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZee"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZcomb"))) continue;
+      if(!n.Contains(TRegexp("ZSVPureRegionHZcomb"))) continue;
 
       if(n.Contains(TRegexp("RegionHZcomb")))
 	process = "Z(l^{+}l^{-})H(b#bar{b})";
@@ -129,6 +128,10 @@ void plottingmacro_IVF()
       hmc->Sumw2();
       //      hmc->Rebin(o.rebin);
 
+      //histo for ttbar
+      TH1F *h_ttbar = new TH1F("h_ttbar","h_ttbar", nbin, min_bin, max_bin);
+      h_ttbar->Sumw2();
+
       if(debug_)
 	std::cout << "Creating the THStack and Legend" << std::endl;
       THStack * sta = new THStack("sta",hd->GetTitle());
@@ -146,7 +149,8 @@ void plottingmacro_IVF()
       //with the proper trigger eff
       //      double SF[] = {1.01,1.03,1.00};
       //      double SF[] = {1.03,1.054,1.032};
-      double SF[] = {1.0,1.0,1.0};
+      //      double SF[] = {1.0,1.0,1.0};
+      double SF[] = {1.0,1.0,1.089};
 
       if(debug_){
 	for(int i = 0; i< 3; ++i)
@@ -158,6 +162,8 @@ void plottingmacro_IVF()
 	{ 
 	  if(!s[j].data) 
 	    {
+	      TString sampleName=s[j].name;
+
 	      if(debug_)
 		std::cout << "Creating TH1F from file " << s[j].name << std::endl;  
 	      TH1F * h = ((TH1F*)s[j].file()->Get(names[i].c_str()));
@@ -183,14 +189,20 @@ void plottingmacro_IVF()
 		l->AddEntry(h,s[j].name.c_str(),"F");
 	      }
 	      std::cout << "Sample : " << s[j].name << " - Integral for plot " << names[i] << " = " << h->Integral(-10000,10000) << std::endl;
-	      mcIntegral += h->Integral();
-	      sta->Add(h);
-	      hmc->Add(h);	      
-	      //TO FIX grouped map
-	      // sovrascrive histo con lo stesso nome tipo VV o ST etc...
-	      grouped[s[j].name]=(TH1F *)h->Clone(("_"+names[i]).c_str());
+	      if( sampleName.Contains(TRegexp("TTbar")) )
+		h_ttbar->Add(h);
+	      else{
+		mcIntegral += h->Integral();
+		sta->Add(h);
+		hmc->Add(h);	      
+		//TO FIX grouped map
+		// sovrascrive histo con lo stesso nome tipo VV o ST etc...
+		grouped[s[j].name]=(TH1F *)h->Clone(("_"+names[i]).c_str());
+	      }
 	    }
 	}
+
+      hd->Add(h_ttbar,-1);
 
       if(debug_){
 	std::cout << "Data total = " << hd->Integral() << std::endl;
@@ -301,7 +313,8 @@ void plottingmacro_IVF()
       latex.DrawLatex(0.17,0.79,process.c_str());
       c->Update();
       std::string cName= hd->GetName();
-      cName += "_bare.pdf";
+      //      cName += "_bare.pdf";
+      cName += "_norm.pdf";
       cName = path+cName;
       c->Print(cName.c_str(),"pdf");
 

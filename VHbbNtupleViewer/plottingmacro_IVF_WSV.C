@@ -13,7 +13,7 @@
 #include "TGraphErrors.h"
 #include "TAxis.h"
 
-void plottingmacro_IVF()
+void plottingmacro_IVF_WSV()
 {
 
 
@@ -23,7 +23,7 @@ void plottingmacro_IVF()
 
   //  std::string path("Nov10thFall11Plots/");
   //  std::string path("Nov10Fall1160MTopSlimPlots/");
-  std::string path("Nov10Fall1160MTopIVFPlots_b/");
+  std::string path("Nov10Fall1160MTopIVFPlotsWSV_b/");
 
   if(debug_)
     std::cout << "Init the style form setTDRStyle" << std::endl;
@@ -37,7 +37,7 @@ void plottingmacro_IVF()
     std::cout << "Init the sample" << std::endl;
   //  std::vector<Sample> s = Nov10thDiJetPtUpdatedSlimHistos();
   //std::vector<Sample> s = Nov10Fall1160MTopSlimHistos();
-  std::vector<Sample> s = Nov10Fall1160MTopIVFHistos();
+  std::vector<Sample> s = Nov10Fall1160MTopIVFWSVHistos();
 
   Sample data(1,"fake data","S1.root",0,true,1000);
 
@@ -90,19 +90,18 @@ void plottingmacro_IVF()
       //      if(!n.Contains(TRegexp("VlightRegionHZee/HiggsPtVlightRegionHZee"))) continue;
       //      if(!n.Contains(TRegexp("VlightRegionHZee/ZPtVlightRegionHZee"))) continue;
       //      if(!n.Contains(TRegexp("VlightRegionHZee"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZmmSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZeeSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVRegionZcombSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVPureRegionZcombSV"))) continue;
-      //      if(!n.Contains(TRegexp("ZSVTTbarPureRegionZcombSV"))) continue;
-      if(!n.Contains(TRegexp("TTbarRegionZeeSVJets"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZmm"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZee"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVRegionHZcomb"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVPureRegionHZcomb"))) continue;
+      //      if(!n.Contains(TRegexp("ZSVTTbarPureRegionHZcomb"))) continue;
 
-      if(n.Contains(TRegexp("RegionHZcomb")))
-	process = "Z(l^{+}l^{-})H(b#bar{b})";
-      if(n.Contains(TRegexp("RegionHZmm")))
-	process = "Z(#mu^{+}#mu^{-})H(b#bar{b})";
-      if(n.Contains(TRegexp("RegionHZee")))
-	process = "Z(e^{+}e^{-})H(b#bar{b})";
+      if(n.Contains(TRegexp("RegionHWcomb")))
+	process = "Z(l#nu)H(b#bar{b})";
+      if(n.Contains(TRegexp("RegionHWmnu")))
+	process = "W(#mu#nu)H(b#bar{b})";
+      if(n.Contains(TRegexp("RegionHWenu")))
+	process = "W(e#nu)H(b#bar{b})";
 
       if(debug_)
 	std::cout << "Creating the Canvas" << std::endl;
