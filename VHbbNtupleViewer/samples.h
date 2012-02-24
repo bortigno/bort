@@ -21,8 +21,26 @@ Sample( float xs, std::string n, std::string f, int c, bool isdata, float datalu
 
   float lumi() {  if(data) return luminosity; else return numberOfEvents()/xsec; }
   float lumi(double fA, double fB) {  if(data) return luminosity; else return numberOfEvents(fA,fB)/xsec; }
-  float scale(float l) { return l/lumi();}
-  float scale(float l, double fA, double fB) { return l/lumi(fA,fB);}
+  float scale(float l) { if(lumi()>0) return l/lumi(); else return 0;}
+  float scale(float l, double fA, double fB) { if(lumi(fA,fB)>0) return l/lumi(fA,fB); else return 0;}
+  float scale(float l, double fA, double fB, double *SF) { 
+    std::string DYL("DYL");
+    std::string DYC("DYC");
+    std::string DYNoB("DYNoB");
+    std::string DYB("DYB");
+    std::string TTbar("TTbar");
+    if(lumi(fA,fB)>0){
+      if(name == DYL || name == DYC || name == DYNoB)
+	return SF[0]*l/lumi(fA,fB);
+      else if(name == TTbar) 
+	return SF[1]*l/lumi(fA,fB); 
+      else if(name == DYB)
+	return SF[2]*l/lumi(fA,fB);
+      else
+	return scale(l,fA,fB);
+    }
+    else 
+      return 0; }
   TFile * file() { if(f) return f; else return f=TFile::Open(filename.c_str());}
   float numberOfEvents( double fA, double fB ) 
   {
