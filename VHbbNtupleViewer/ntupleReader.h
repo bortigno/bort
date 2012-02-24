@@ -1,8 +1,8 @@
 //////////////////////////////////////////////////////////
 // This class has been automatically generated on
-// Tue Nov  8 17:03:59 2011 by ROOT version 5.30/02
+// Mon Dec 19 15:42:42 2011 by ROOT version 5.30/02
 // from TTree tree/myTree
-// found on file: /Users/pier/Physics/VHbbAnalysis/HBB_EDMNtuple/V11/Nov1st/DiJetPt/DiJetPt_DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola.root
+// found on file: /Users/pier/Physics/ZSVAnalysis/HBB_EDMNtuple/V11/DiJetPt_DoubleElectron_Run2011_FULL.root
 //////////////////////////////////////////////////////////
 
 #ifndef ntupleReader_h
@@ -11,6 +11,7 @@
 #include <TROOT.h>
 #include <TChain.h>
 #include <TFile.h>
+#include "TLorentzVector.h"
 
 class ntupleReader {
 public :
@@ -38,6 +39,10 @@ public :
    Float_t         hJet_phi[2];   //[nhJets]
    Float_t         hJet_e[2];   //[nhJets]
    Float_t         hJet_csv[2];   //[nhJets]
+   Float_t         hJet_csvDown[2];   //[nhJets]
+   Float_t         hJet_csvUp[2];   //[nhJets]
+   Float_t         hJet_csvFDown[2];   //[nhJets]
+   Float_t         hJet_csvFUp[2];   //[nhJets]
    Float_t         hJet_cosTheta[2];   //[nhJets]
    Int_t           hJet_numTracksSV[2];   //[nhJets]
    Float_t         hJet_chf[2];   //[nhJets]
@@ -55,28 +60,40 @@ public :
    Float_t         hJet_vtx3dL[2];   //[nhJets]
    Float_t         hJet_vtx3deL[2];   //[nhJets]
    UChar_t         hJet_id[2];   //[nhJets]
-   Float_t         aJet_pt[41];   //[naJets]
-   Float_t         aJet_eta[41];   //[naJets]
-   Float_t         aJet_phi[41];   //[naJets]
-   Float_t         aJet_e[41];   //[naJets]
-   Float_t         aJet_csv[41];   //[naJets]
-   Float_t         aJet_cosTheta[41];   //[naJets]
-   Int_t           aJet_numTracksSV[41];   //[naJets]
-   Float_t         aJet_chf[41];   //[naJets]
-   Float_t         aJet_nhf[41];   //[naJets]
-   Float_t         aJet_cef[41];   //[naJets]
-   Float_t         aJet_nef[41];   //[naJets]
-   Float_t         aJet_nch[41];   //[naJets]
-   Float_t         aJet_nconstituents[41];   //[naJets]
-   Float_t         aJet_flavour[41];   //[naJets]
-   Float_t         aJet_genPt[41];   //[naJets]
-   Float_t         aJet_genEta[41];   //[naJets]
-   Float_t         aJet_genPhi[41];   //[naJets]
-   Float_t         aJet_JECUnc[41];   //[naJets]
-   Float_t         aJet_vtxMass[41];   //[naJets]
-   Float_t         aJet_vtx3dL[41];   //[naJets]
-   Float_t         aJet_vtx3deL[41];   //[naJets]
-   UChar_t         aJet_id[41];   //[naJets]
+   UChar_t         hJet_SF_CSVL[2];   //[nhJets]
+   UChar_t         hJet_SF_CSVM[2];   //[nhJets]
+   UChar_t         hJet_SF_CSVT[2];   //[nhJets]
+   UChar_t         hJet_SF_CSVLerr[2];   //[nhJets]
+   UChar_t         hJet_SF_CSVMerr[2];   //[nhJets]
+   UChar_t         hJet_SF_CSVTerr[2];   //[nhJets]
+   Float_t         aJet_pt[37];   //[naJets]
+   Float_t         aJet_eta[37];   //[naJets]
+   Float_t         aJet_phi[37];   //[naJets]
+   Float_t         aJet_e[37];   //[naJets]
+   Float_t         aJet_csv[37];   //[naJets]
+   Float_t         aJet_cosTheta[37];   //[naJets]
+   Int_t           aJet_numTracksSV[37];   //[naJets]
+   Float_t         aJet_chf[37];   //[naJets]
+   Float_t         aJet_nhf[37];   //[naJets]
+   Float_t         aJet_cef[37];   //[naJets]
+   Float_t         aJet_nef[37];   //[naJets]
+   Float_t         aJet_nch[37];   //[naJets]
+   Float_t         aJet_nconstituents[37];   //[naJets]
+   Float_t         aJet_flavour[37];   //[naJets]
+   Float_t         aJet_genPt[37];   //[naJets]
+   Float_t         aJet_genEta[37];   //[naJets]
+   Float_t         aJet_genPhi[37];   //[naJets]
+   Float_t         aJet_JECUnc[37];   //[naJets]
+   Float_t         aJet_vtxMass[37];   //[naJets]
+   Float_t         aJet_vtx3dL[37];   //[naJets]
+   Float_t         aJet_vtx3deL[37];   //[naJets]
+   UChar_t         aJet_id[37];   //[naJets]
+   UChar_t         aJet_SF_CSVL[37];   //[naJets]
+   UChar_t         aJet_SF_CSVM[37];   //[naJets]
+   UChar_t         aJet_SF_CSVT[37];   //[naJets]
+   UChar_t         aJet_SF_CSVLerr[37];   //[naJets]
+   UChar_t         aJet_SF_CSVMerr[37];   //[naJets]
+   UChar_t         aJet_SF_CSVTerr[37];   //[naJets]
    Int_t           numJets;
    Int_t           numBJets;
    Float_t         deltaPullAngle;
@@ -94,6 +111,13 @@ public :
    Float_t         weightEleTrigJetMETPart;
    Float_t         weightEleTrigElePart;
    Float_t         weightEleTrigEleAugPart;
+   Float_t         weightTrigMET80;
+   Float_t         weightTrigMET100;
+   Float_t         weightTrig2CJet20;
+   Float_t         weightTrigMET150;
+   Float_t         weightTrigMET802CJet;
+   Float_t         weightTrigMET1002CJet;
+   Float_t         weightTrigMETLP;
    Float_t         deltaPullAngleAK7;
    Float_t         deltaPullAngle2AK7;
    Float_t         PU0;
@@ -126,39 +150,47 @@ public :
    Float_t         vLepton_id80[2];   //[nvlep]
    Float_t         vLepton_id95[2];   //[nvlep]
    Float_t         vLepton_vbtf[2];   //[nvlep]
-   Float_t         aLepton_mass[3];   //[nalep]
-   Float_t         aLepton_pt[3];   //[nalep]
-   Float_t         aLepton_eta[3];   //[nalep]
-   Float_t         aLepton_phi[3];   //[nalep]
-   Float_t         aLepton_aodCombRelIso[3];   //[nalep]
-   Float_t         aLepton_pfCombRelIso[3];   //[nalep]
-   Float_t         aLepton_photonIso[3];   //[nalep]
-   Float_t         aLepton_neutralHadIso[3];   //[nalep]
-   Float_t         aLepton_chargedHadIso[3];   //[nalep]
-   Float_t         aLepton_chargedPUIso[3];   //[nalep]
-   Float_t         aLepton_particleIso[3];   //[nalep]
-   Float_t         aLepton_dxy[3];   //[nalep]
-   Float_t         aLepton_dz[3];   //[nalep]
-   Int_t           aLepton_type[3];   //[nalep]
-   Float_t         aLepton_id80[3];   //[nalep]
-   Float_t         aLepton_id95[3];   //[nalep]
-   Float_t         aLepton_vbtf[3];   //[nalep]
+   Float_t         vLepton_id80NoIso[2];   //[nvlep]
+   Float_t         vLepton_genPt[2];   //[nvlep]
+   Float_t         vLepton_genEta[2];   //[nvlep]
+   Float_t         vLepton_genPhi[2];   //[nvlep]
+   Float_t         aLepton_mass[4];   //[nalep]
+   Float_t         aLepton_pt[4];   //[nalep]
+   Float_t         aLepton_eta[4];   //[nalep]
+   Float_t         aLepton_phi[4];   //[nalep]
+   Float_t         aLepton_aodCombRelIso[4];   //[nalep]
+   Float_t         aLepton_pfCombRelIso[4];   //[nalep]
+   Float_t         aLepton_photonIso[4];   //[nalep]
+   Float_t         aLepton_neutralHadIso[4];   //[nalep]
+   Float_t         aLepton_chargedHadIso[4];   //[nalep]
+   Float_t         aLepton_chargedPUIso[4];   //[nalep]
+   Float_t         aLepton_particleIso[4];   //[nalep]
+   Float_t         aLepton_dxy[4];   //[nalep]
+   Float_t         aLepton_dz[4];   //[nalep]
+   Int_t           aLepton_type[4];   //[nalep]
+   Float_t         aLepton_id80[4];   //[nalep]
+   Float_t         aLepton_id95[4];   //[nalep]
+   Float_t         aLepton_vbtf[4];   //[nalep]
+   Float_t         aLepton_id80NoIso[4];   //[nalep]
+   Float_t         aLepton_genPt[4];   //[nalep]
+   Float_t         aLepton_genEta[4];   //[nalep]
+   Float_t         aLepton_genPhi[4];   //[nalep]
    Float_t         top_mass;
    Float_t         top_pt;
    Float_t         top_wMass;
    Int_t           WplusMode;
    Int_t           WminusMode;
    Int_t           nSvs;
-   Float_t         Sv_massBCand[4];   //[nSvs]
-   Float_t         Sv_massSv[4];   //[nSvs]
-   Float_t         Sv_pt[4];   //[nSvs]
-   Float_t         Sv_eta[4];   //[nSvs]
-   Float_t         Sv_phi[4];   //[nSvs]
-   Float_t         Sv_dist3D[4];   //[nSvs]
-   Float_t         Sv_dist2D[4];   //[nSvs]
-   Float_t         Sv_distSim2D[4];   //[nSvs]
-   Float_t         Sv_distSig3D[4];   //[nSvs]
-   Float_t         Sv_dist3D_norm[4];   //[nSvs]
+   Float_t         Sv_massBCand[5];   //[nSvs]
+   Float_t         Sv_massSv[5];   //[nSvs]
+   Float_t         Sv_pt[5];   //[nSvs]
+   Float_t         Sv_eta[5];   //[nSvs]
+   Float_t         Sv_phi[5];   //[nSvs]
+   Float_t         Sv_dist3D[5];   //[nSvs]
+   Float_t         Sv_dist2D[5];   //[nSvs]
+   Float_t         Sv_distSim2D[5];   //[nSvs]
+   Float_t         Sv_distSig3D[5];   //[nSvs]
+   Float_t         Sv_dist3D_norm[5];   //[nSvs]
    Float_t         SVH_mass;
    Float_t         SVH_pt;
    Float_t         SVH_eta;
@@ -166,6 +198,23 @@ public :
    Float_t         SVH_dR;
    Float_t         SVH_dPhi;
    Float_t         SVH_dEta;
+   Int_t           nSimBs;
+   Float_t         SimBs_mass[8];   //[nSimBs]
+   Float_t         SimBs_pt[8];   //[nSimBs]
+   Float_t         SimBs_eta[8];   //[nSimBs]
+   Float_t         SimBs_phi[8];   //[nSimBs]
+   Float_t         SimBs_vtx_x[8];   //[nSimBs]
+   Float_t         SimBs_vtx_y[8];   //[nSimBs]
+   Float_t         SimBs_vtx_z[8];   //[nSimBs]
+   Float_t         SimBs_pdgId[8];   //[nSimBs]
+   Float_t         SimBs_status[8];   //[nSimBs]
+   Float_t         SimBsH_mass;
+   Float_t         SimBsH_pt;
+   Float_t         SimBsH_eta;
+   Float_t         SimBsH_phi;
+   Float_t         SimBsH_dR;
+   Float_t         SimBsH_dPhi;
+   Float_t         SimBsH_dEta;
    Float_t         rho;
    Float_t         rho25;
    Int_t           nPVs;
@@ -197,6 +246,7 @@ public :
    Int_t           EVENT_event;
    Int_t           EVENT_json;
    UChar_t         hbhe;
+   UChar_t         totalKinematics;
    UChar_t         ecalFlag;
    Float_t         btag1TSF;
    Float_t         btag2TSF;
@@ -216,6 +266,10 @@ public :
    TBranch        *b_hJet_phi;   //!
    TBranch        *b_hJet_e;   //!
    TBranch        *b_hJet_csv;   //!
+   TBranch        *b_hJet_csvDown;   //!
+   TBranch        *b_hJet_csvUp;   //!
+   TBranch        *b_hJet_csvFDown;   //!
+   TBranch        *b_hJet_csvFUp;   //!
    TBranch        *b_hJet_cosTheta;   //!
    TBranch        *b_hJet_numTracksSV;   //!
    TBranch        *b_hJet_chf;   //!
@@ -233,6 +287,12 @@ public :
    TBranch        *b_hJet_vtx3dL;   //!
    TBranch        *b_hJet_vtx3deL;   //!
    TBranch        *b_hJet_id;   //!
+   TBranch        *b_hJet_SF_CSVL;   //!
+   TBranch        *b_hJet_SF_CSVM;   //!
+   TBranch        *b_hJet_SF_CSVT;   //!
+   TBranch        *b_hJet_SF_CSVLerr;   //!
+   TBranch        *b_hJet_SF_CSVMerr;   //!
+   TBranch        *b_hJet_SF_CSVTerr;   //!
    TBranch        *b_aJet_pt;   //!
    TBranch        *b_aJet_eta;   //!
    TBranch        *b_aJet_phi;   //!
@@ -255,6 +315,12 @@ public :
    TBranch        *b_aJet_vtx3dL;   //!
    TBranch        *b_aJet_vtx3deL;   //!
    TBranch        *b_aJet_id;   //!
+   TBranch        *b_aJet_SF_CSVL;   //!
+   TBranch        *b_aJet_SF_CSVM;   //!
+   TBranch        *b_aJet_SF_CSVT;   //!
+   TBranch        *b_aJet_SF_CSVLerr;   //!
+   TBranch        *b_aJet_SF_CSVMerr;   //!
+   TBranch        *b_aJet_SF_CSVTerr;   //!
    TBranch        *b_numJets;   //!
    TBranch        *b_numBJets;   //!
    TBranch        *b_deltaPullAngle;   //!
@@ -272,6 +338,13 @@ public :
    TBranch        *b_weightEleTrigJetMETPart;   //!
    TBranch        *b_weightEleTrigElePart;   //!
    TBranch        *b_weightEleTrigEleAugPart;   //!
+   TBranch        *b_weightTrigMET80;   //!
+   TBranch        *b_weightTrigMET100;   //!
+   TBranch        *b_weightTrig2CJet20;   //!
+   TBranch        *b_weightTrigMET150;   //!
+   TBranch        *b_weightTrigMET802CJet;   //!
+   TBranch        *b_weightTrigMET1002CJet;   //!
+   TBranch        *b_weightTrigMETLP;   //!
    TBranch        *b_deltaPullAngleAK7;   //!
    TBranch        *b_deltaPullAngle2AK7;   //!
    TBranch        *b_PU0;   //!
@@ -304,6 +377,10 @@ public :
    TBranch        *b_vLepton_id80;   //!
    TBranch        *b_vLepton_id95;   //!
    TBranch        *b_vLepton_vbtf;   //!
+   TBranch        *b_vLepton_id80NoIso;   //!
+   TBranch        *b_vLepton_genPt;   //!
+   TBranch        *b_vLepton_genEta;   //!
+   TBranch        *b_vLepton_genPhi;   //!
    TBranch        *b_aLepton_mass;   //!
    TBranch        *b_aLepton_pt;   //!
    TBranch        *b_aLepton_eta;   //!
@@ -321,6 +398,10 @@ public :
    TBranch        *b_aLepton_id80;   //!
    TBranch        *b_aLepton_id95;   //!
    TBranch        *b_aLepton_vbtf;   //!
+   TBranch        *b_aLepton_id80NoIso;   //!
+   TBranch        *b_aLepton_genPt;   //!
+   TBranch        *b_aLepton_genEta;   //!
+   TBranch        *b_aLepton_genPhi;   //!
    TBranch        *b_top;   //!
    TBranch        *b_WplusMode;   //!
    TBranch        *b_WminusMode;   //!
@@ -336,6 +417,17 @@ public :
    TBranch        *b_Sv_distSig3D;   //!
    TBranch        *b_Sv_dist3D_norm;   //!
    TBranch        *b_SVH;   //!
+   TBranch        *b_nSimBs;   //!
+   TBranch        *b_SimBs_mass;   //!
+   TBranch        *b_SimBs_pt;   //!
+   TBranch        *b_SimBs_eta;   //!
+   TBranch        *b_SimBs_phi;   //!
+   TBranch        *b_SimBs_vtx_x;   //!
+   TBranch        *b_SimBs_vtx_y;   //!
+   TBranch        *b_SimBs_vtx_z;   //!
+   TBranch        *b_SimBs_pdgId;   //!
+   TBranch        *b_SimBs_status;   //!
+   TBranch        *b_SimBsH;   //!
    TBranch        *b_rho;   //!
    TBranch        *b_rho25;   //!
    TBranch        *b_nPVs;   //!
@@ -349,6 +441,7 @@ public :
    TBranch        *b_triggerFlags;   //!
    TBranch        *b_EVENT;   //!
    TBranch        *b_hbhe;   //!
+   TBranch        *b_totalKinematics;   //!
    TBranch        *b_ecalFlag;   //!
    TBranch        *b_btag1TSF;   //!
    TBranch        *b_btag2TSF;   //!
@@ -358,11 +451,29 @@ public :
    TBranch        *b_btagA0TSF;   //!
    TBranch        *b_btag1TA1C;   //!
 
+
    ntupleReader(const char * infile);
    virtual ~ntupleReader();
+   virtual std::vector<TLorentzVector> SimBs();
+   virtual int CountJets();
    virtual int CountAddJets();
+   virtual int CountAddForwardJets();
+   virtual int CountAddJets_jec( double sign );
    virtual int CountAddLeptons();
    virtual bool TriggerBit();
+   virtual double hJet_pt_jec( int idx, double sign ); //higgs jet energy correction
+   virtual double aJet_pt_jec( int idx, double sign ); //addtional jet energy correction
+   virtual TLorentzVector H_jec( double sign ); //higgs candidate jet energy correction
+   virtual double hJet_csv_cUP( int idx );
+   virtual double hJet_csv_cDOWN( int idx );
+   virtual double hJet_csv_cFUP( int idx );
+   virtual double hJet_csv_cFDOWN( int idx );
+   virtual double hJet_pt_jecUP( int idx );
+   virtual double hJet_pt_jecDOWN( int idx );
+   virtual double aJet_pt_jecUP( int idx );
+   virtual double aJet_pt_jecDOWN( int idx );
+   virtual TLorentzVector H_jecUP();
+   virtual TLorentzVector H_jecDOWN();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
    virtual Long64_t LoadTree(Long64_t entry);
@@ -370,7 +481,9 @@ public :
    virtual void     Loop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
+
 };
+
 
 ntupleReader::ntupleReader(const char * infile)
 {
@@ -413,6 +526,7 @@ Long64_t ntupleReader::LoadTree(Long64_t entry)
    return centry;
 }
 
+
 void ntupleReader::Init(TTree *tree)
 {
    // The Init() function is called when the selector needs to initialize
@@ -438,6 +552,10 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("hJet_phi", hJet_phi, &b_hJet_phi);
    fChain->SetBranchAddress("hJet_e", hJet_e, &b_hJet_e);
    fChain->SetBranchAddress("hJet_csv", hJet_csv, &b_hJet_csv);
+   fChain->SetBranchAddress("hJet_csvDown", hJet_csvDown, &b_hJet_csvDown);
+   fChain->SetBranchAddress("hJet_csvUp", hJet_csvUp, &b_hJet_csvUp);
+   fChain->SetBranchAddress("hJet_csvFDown", hJet_csvFDown, &b_hJet_csvFDown);
+   fChain->SetBranchAddress("hJet_csvFUp", hJet_csvFUp, &b_hJet_csvFUp);
    fChain->SetBranchAddress("hJet_cosTheta", hJet_cosTheta, &b_hJet_cosTheta);
    fChain->SetBranchAddress("hJet_numTracksSV", hJet_numTracksSV, &b_hJet_numTracksSV);
    fChain->SetBranchAddress("hJet_chf", hJet_chf, &b_hJet_chf);
@@ -455,6 +573,12 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("hJet_vtx3dL", hJet_vtx3dL, &b_hJet_vtx3dL);
    fChain->SetBranchAddress("hJet_vtx3deL", hJet_vtx3deL, &b_hJet_vtx3deL);
    fChain->SetBranchAddress("hJet_id", hJet_id, &b_hJet_id);
+   fChain->SetBranchAddress("hJet_SF_CSVL", hJet_SF_CSVL, &b_hJet_SF_CSVL);
+   fChain->SetBranchAddress("hJet_SF_CSVM", hJet_SF_CSVM, &b_hJet_SF_CSVM);
+   fChain->SetBranchAddress("hJet_SF_CSVT", hJet_SF_CSVT, &b_hJet_SF_CSVT);
+   fChain->SetBranchAddress("hJet_SF_CSVLerr", hJet_SF_CSVLerr, &b_hJet_SF_CSVLerr);
+   fChain->SetBranchAddress("hJet_SF_CSVMerr", hJet_SF_CSVMerr, &b_hJet_SF_CSVMerr);
+   fChain->SetBranchAddress("hJet_SF_CSVTerr", hJet_SF_CSVTerr, &b_hJet_SF_CSVTerr);
    fChain->SetBranchAddress("aJet_pt", aJet_pt, &b_aJet_pt);
    fChain->SetBranchAddress("aJet_eta", aJet_eta, &b_aJet_eta);
    fChain->SetBranchAddress("aJet_phi", aJet_phi, &b_aJet_phi);
@@ -477,6 +601,12 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("aJet_vtx3dL", aJet_vtx3dL, &b_aJet_vtx3dL);
    fChain->SetBranchAddress("aJet_vtx3deL", aJet_vtx3deL, &b_aJet_vtx3deL);
    fChain->SetBranchAddress("aJet_id", aJet_id, &b_aJet_id);
+   fChain->SetBranchAddress("aJet_SF_CSVL", aJet_SF_CSVL, &b_aJet_SF_CSVL);
+   fChain->SetBranchAddress("aJet_SF_CSVM", aJet_SF_CSVM, &b_aJet_SF_CSVM);
+   fChain->SetBranchAddress("aJet_SF_CSVT", aJet_SF_CSVT, &b_aJet_SF_CSVT);
+   fChain->SetBranchAddress("aJet_SF_CSVLerr", aJet_SF_CSVLerr, &b_aJet_SF_CSVLerr);
+   fChain->SetBranchAddress("aJet_SF_CSVMerr", aJet_SF_CSVMerr, &b_aJet_SF_CSVMerr);
+   fChain->SetBranchAddress("aJet_SF_CSVTerr", aJet_SF_CSVTerr, &b_aJet_SF_CSVTerr);
    fChain->SetBranchAddress("numJets", &numJets, &b_numJets);
    fChain->SetBranchAddress("numBJets", &numBJets, &b_numBJets);
    fChain->SetBranchAddress("deltaPullAngle", &deltaPullAngle, &b_deltaPullAngle);
@@ -494,6 +624,13 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("weightEleTrigJetMETPart", &weightEleTrigJetMETPart, &b_weightEleTrigJetMETPart);
    fChain->SetBranchAddress("weightEleTrigElePart", &weightEleTrigElePart, &b_weightEleTrigElePart);
    fChain->SetBranchAddress("weightEleTrigEleAugPart", &weightEleTrigEleAugPart, &b_weightEleTrigEleAugPart);
+   fChain->SetBranchAddress("weightTrigMET80", &weightTrigMET80, &b_weightTrigMET80);
+   fChain->SetBranchAddress("weightTrigMET100", &weightTrigMET100, &b_weightTrigMET100);
+   fChain->SetBranchAddress("weightTrig2CJet20", &weightTrig2CJet20, &b_weightTrig2CJet20);
+   fChain->SetBranchAddress("weightTrigMET150", &weightTrigMET150, &b_weightTrigMET150);
+   fChain->SetBranchAddress("weightTrigMET802CJet", &weightTrigMET802CJet, &b_weightTrigMET802CJet);
+   fChain->SetBranchAddress("weightTrigMET1002CJet", &weightTrigMET1002CJet, &b_weightTrigMET1002CJet);
+   fChain->SetBranchAddress("weightTrigMETLP", &weightTrigMETLP, &b_weightTrigMETLP);
    fChain->SetBranchAddress("deltaPullAngleAK7", &deltaPullAngleAK7, &b_deltaPullAngleAK7);
    fChain->SetBranchAddress("deltaPullAngle2AK7", &deltaPullAngle2AK7, &b_deltaPullAngle2AK7);
    fChain->SetBranchAddress("PU0", &PU0, &b_PU0);
@@ -526,6 +663,10 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("vLepton_id80", vLepton_id80, &b_vLepton_id80);
    fChain->SetBranchAddress("vLepton_id95", vLepton_id95, &b_vLepton_id95);
    fChain->SetBranchAddress("vLepton_vbtf", vLepton_vbtf, &b_vLepton_vbtf);
+   fChain->SetBranchAddress("vLepton_id80NoIso", vLepton_id80NoIso, &b_vLepton_id80NoIso);
+   fChain->SetBranchAddress("vLepton_genPt", vLepton_genPt, &b_vLepton_genPt);
+   fChain->SetBranchAddress("vLepton_genEta", vLepton_genEta, &b_vLepton_genEta);
+   fChain->SetBranchAddress("vLepton_genPhi", vLepton_genPhi, &b_vLepton_genPhi);
    fChain->SetBranchAddress("aLepton_mass", aLepton_mass, &b_aLepton_mass);
    fChain->SetBranchAddress("aLepton_pt", aLepton_pt, &b_aLepton_pt);
    fChain->SetBranchAddress("aLepton_eta", aLepton_eta, &b_aLepton_eta);
@@ -543,6 +684,10 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("aLepton_id80", aLepton_id80, &b_aLepton_id80);
    fChain->SetBranchAddress("aLepton_id95", aLepton_id95, &b_aLepton_id95);
    fChain->SetBranchAddress("aLepton_vbtf", aLepton_vbtf, &b_aLepton_vbtf);
+   fChain->SetBranchAddress("aLepton_id80NoIso", aLepton_id80NoIso, &b_aLepton_id80NoIso);
+   fChain->SetBranchAddress("aLepton_genPt", aLepton_genPt, &b_aLepton_genPt);
+   fChain->SetBranchAddress("aLepton_genEta", aLepton_genEta, &b_aLepton_genEta);
+   fChain->SetBranchAddress("aLepton_genPhi", aLepton_genPhi, &b_aLepton_genPhi);
    fChain->SetBranchAddress("top", &top_mass, &b_top);
    fChain->SetBranchAddress("WplusMode", &WplusMode, &b_WplusMode);
    fChain->SetBranchAddress("WminusMode", &WminusMode, &b_WminusMode);
@@ -558,6 +703,17 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("Sv_distSig3D", Sv_distSig3D, &b_Sv_distSig3D);
    fChain->SetBranchAddress("Sv_dist3D_norm", Sv_dist3D_norm, &b_Sv_dist3D_norm);
    fChain->SetBranchAddress("SVH", &SVH_mass, &b_SVH);
+   fChain->SetBranchAddress("nSimBs", &nSimBs, &b_nSimBs);
+   fChain->SetBranchAddress("SimBs_mass", SimBs_mass, &b_SimBs_mass);
+   fChain->SetBranchAddress("SimBs_pt", SimBs_pt, &b_SimBs_pt);
+   fChain->SetBranchAddress("SimBs_eta", SimBs_eta, &b_SimBs_eta);
+   fChain->SetBranchAddress("SimBs_phi", SimBs_phi, &b_SimBs_phi);
+   fChain->SetBranchAddress("SimBs_vtx_x", SimBs_vtx_x, &b_SimBs_vtx_x);
+   fChain->SetBranchAddress("SimBs_vtx_y", SimBs_vtx_y, &b_SimBs_vtx_y);
+   fChain->SetBranchAddress("SimBs_vtx_z", SimBs_vtx_z, &b_SimBs_vtx_z);
+   fChain->SetBranchAddress("SimBs_pdgId", SimBs_pdgId, &b_SimBs_pdgId);
+   fChain->SetBranchAddress("SimBs_status", SimBs_status, &b_SimBs_status);
+   fChain->SetBranchAddress("SimBsH", &SimBsH_mass, &b_SimBsH);
    fChain->SetBranchAddress("rho", &rho, &b_rho);
    fChain->SetBranchAddress("rho25", &rho25, &b_rho25);
    fChain->SetBranchAddress("nPVs", &nPVs, &b_nPVs);
@@ -571,6 +727,7 @@ void ntupleReader::Init(TTree *tree)
    fChain->SetBranchAddress("triggerFlags", triggerFlags, &b_triggerFlags);
    fChain->SetBranchAddress("EVENT", &EVENT_run, &b_EVENT);
    fChain->SetBranchAddress("hbhe", &hbhe, &b_hbhe);
+   fChain->SetBranchAddress("totalKinematics", &totalKinematics, &b_totalKinematics);
    fChain->SetBranchAddress("ecalFlag", &ecalFlag, &b_ecalFlag);
    fChain->SetBranchAddress("btag1TSF", &btag1TSF, &b_btag1TSF);
    fChain->SetBranchAddress("btag2TSF", &btag2TSF, &b_btag2TSF);
@@ -607,6 +764,50 @@ Int_t ntupleReader::Cut(Long64_t entry)
 // returns -1 otherwise.
    return 1;
 }
+
+std::vector<TLorentzVector> ntupleReader::SimBs(){
+  TLorentzVector simB;
+  std::vector<TLorentzVector> iSimBs;
+  for(int j=0; j<nSimBs; ++j){
+    simB.SetPtEtaPhiM( SimBs_pt[j], SimBs_eta[j], SimBs_phi[j], SimBs_mass[j]);
+    iSimBs.push_back( simB );
+  }
+  return iSimBs;
+}
+
+//for jet energy correction variation
+double ntupleReader::hJet_pt_jec( int idx, double sign ){ return  hJet_pt[idx]*(1 + (sign)*hJet_JECUnc[idx]); }
+double ntupleReader::aJet_pt_jec( int idx, double sign ){ return  aJet_pt[idx]*(1 + (sign)*aJet_JECUnc[idx]); }
+TLorentzVector ntupleReader::H_jec( double sign ){ 
+  TLorentzVector j1,j2,H;
+  j1.SetPtEtaPhiE( hJet_pt_jec(0,sign), hJet_eta[0], hJet_phi[0], hJet_e[0] );
+  j2.SetPtEtaPhiE( hJet_pt_jec(1,sign), hJet_eta[1], hJet_phi[1], hJet_e[1] );
+  return  H=j1+j2;
+}
+double ntupleReader::hJet_csv_cUP( int idx ){ return ( hJet_csvUp[idx] ); }
+double ntupleReader::hJet_csv_cDOWN( int idx ){ return ( hJet_csvDown[idx] ); }
+double ntupleReader::hJet_csv_cFUP( int idx ){ return ( hJet_csvFUp[idx] ); }
+double ntupleReader::hJet_csv_cFDOWN( int idx ){ return ( hJet_csvFDown[idx] ); }
+double ntupleReader::hJet_pt_jecUP( int idx ){ return hJet_pt_jec(idx,+1); }
+double ntupleReader::hJet_pt_jecDOWN( int idx ){ return  hJet_pt_jec(idx,-1); }
+double ntupleReader::aJet_pt_jecUP( int idx ){ return aJet_pt_jec(idx,+1); }
+double ntupleReader::aJet_pt_jecDOWN( int idx ){ return  aJet_pt_jec(idx,-1); }
+TLorentzVector ntupleReader::H_jecUP(){ return H_jec(+1); }
+TLorentzVector ntupleReader::H_jecDOWN(){ return H_jec(-1); }
+
+
+int ntupleReader::CountJets(){
+  int sum=0;
+  for(int i=0; i<nhJets; ++i)
+    if( hJet_pt[i] > 20.
+	&& TMath::Abs(hJet_eta[i]) < 2.4 )
+      sum++;
+  for(int i=0; i<naJets; ++i)
+    if( aJet_pt[i] > 20.
+	&& TMath::Abs(aJet_eta[i]) < 2.4 )
+      sum++;
+  return sum;
+}
 int ntupleReader::CountAddJets(){
   int sum=0;
   for(int i=0; i<naJets; ++i)
@@ -615,10 +816,29 @@ int ntupleReader::CountAddJets(){
       sum++;
   return sum;
 }
+int ntupleReader::CountAddForwardJets(){
+  int sum=0;
+  for(int i=0; i<naJets; ++i)
+    if( aJet_pt[i] > 30.
+	&& TMath::Abs(aJet_eta[i]) > 2.4 
+	&& TMath::Abs(aJet_eta[i]) < 4.5 )
+      sum++;
+  return sum;
+}
+int ntupleReader::CountAddJets_jec( double sign ){
+  int sum=0;
+  for(int i=0; i<naJets; ++i)
+    if( aJet_pt[i]*(1+(sign)*aJet_JECUnc[i]) > 20.
+	&& TMath::Abs(aJet_eta[i]) < 2.4 )
+      sum++;
+  return sum;
+}
+
 int ntupleReader::CountAddLeptons(){
   int sum=0;
   for(int i=0; i<nalep; ++i)
     if( aLepton_pt[i] > 15.
+	&& abs(aLepton_eta[i]) < 2.5
 	&& aLepton_pfCombRelIso[i] < 0.15 )
       sum++;
   return sum;
@@ -646,3 +866,4 @@ void ntupleReader::Loop()
    }
 }
 #endif // #ifdef ntupleReader_cxx
+
