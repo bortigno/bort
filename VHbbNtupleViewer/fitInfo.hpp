@@ -44,9 +44,10 @@ class fitInfo{
   std::string s_suffix;
   std::string s_region;
   std::string s_var;
+  std::string s_channel;
 
-  double min;
-  double max;
+  double minVar;
+  double maxVar;
   double initial;
 
   TH1F * hd;  
@@ -63,20 +64,42 @@ class fitInfo{
     else
       s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
   };
-  fitInfo(std::string & region, std::string & var, std::string & prefix, std::string & sysprefix , std::string & suffix , double min_, double max_ )
-    :s_region(region), s_var(var), s_prefix(prefix), s_sysprefix(sysprefix), s_suffix(suffix), min(min_), max(max_),cr(new controlRegion), cr_signal( new controlRegion) {
+  fitInfo(std::string & region, std::string & var, std::string & prefix, std::string & sysprefix , std::string & suffix, std::string & channel, double min_, double max_ )
+    :s_region(region), s_var(var), s_prefix(prefix), s_sysprefix(sysprefix), s_suffix(suffix), minVar(min_), maxVar(max_), s_channel(channel),cr(new controlRegion), cr_signal( new controlRegion) {
     cr->init();
     cr_signal->init();
-    s_regionString = s_prefix+s_region+"ControlRegionHZee/"+s_var+s_prefix+s_region+"ControlRegionHZee$";
-    s_regionForSyst = s_sysprefix+s_region+"ControlRegionHZee/"+s_var+s_sysprefix+s_region+"ControlRegionHZee"+s_suffix;
+    s_regionString = s_prefix+s_region+"ControlRegion"+s_channel+"/"+s_var+s_prefix+s_region+"ControlRegion"+s_channel+"$";
+    s_regionForSyst = s_sysprefix+s_region+"ControlRegion"+s_channel+"/"+s_var+s_sysprefix+s_region+"ControlRegion"+s_channel+s_suffix;
     if(s_sysprefix != "")
-      s_signalRegion=s_sysprefix+"RegionHZee/SimpleJet1_phi"+s_sysprefix+"RegionHZee$";
+      s_signalRegion=s_sysprefix+"Region"+s_channel+"/SimpleJet1_phi"+s_sysprefix+"Region"+s_channel+"$";
     else
       s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
+  };
+  fitInfo(std::string & region, std::string & var, std::string & prefix, std::string & sysprefix , std::string & suffix, double min_, double max_ )
+    :s_region(region), s_var(var), s_prefix(prefix), s_sysprefix(sysprefix), s_suffix(suffix), minVar(min_), maxVar(max_),cr(new controlRegion), cr_signal( new controlRegion) {
+    cr->init();
+    cr_signal->init();
+    s_channel = "HZee";
+    s_regionString = s_prefix+s_region+"ControlRegion"+s_channel+"/"+s_var+s_prefix+s_region+"ControlRegion"+s_channel+"$";
+    s_regionForSyst = s_sysprefix+s_region+"ControlRegion"+s_channel+"/"+s_var+s_sysprefix+s_region+"ControlRegion"+s_channel+s_suffix;
+    if(s_sysprefix != "")
+      s_signalRegion=s_sysprefix+"Region"+s_channel+"/SimpleJet1_phi"+s_sysprefix+"Region"+s_channel+"$";
+    else
+      s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
+  };
+  fitInfo(std::string & regionString , double min_, double max_ )
+    :s_regionString(regionString), minVar(min_), maxVar(max_),cr(new controlRegion), cr_signal( new controlRegion) {
+    cr->init();
+    cr_signal->init();
+    s_regionForSyst = "";
+    s_signalRegion = "";
   };
   ~fitInfo() {};
 
   std::string regionName(){return s_region;}
+  std::string regionString(){return s_regionString;}
+
+  void setSignalRegion( std::string & signalString ){ s_signalRegion = signalString; std::cout << s_signalRegion << std::endl; }
 
   std::string s_regionString;
   std::string s_regionForSyst;
@@ -86,17 +109,6 @@ class fitInfo{
 
   void fillHistoToFit( TH1F & data ){
     hd = new TH1F( data );
-  }
-
-  void init(){
-    cr->init();
-    cr_signal->init();
-    s_regionString = s_prefix+s_region+"ControlRegionHZee/"+s_var+s_prefix+s_region+"ControlRegionHZee$";
-    s_regionForSyst = s_sysprefix+s_region+"ControlRegionHZee/"+s_var+s_sysprefix+s_region+"ControlRegionHZee"+s_suffix;
-    if(s_sysprefix != "")
-      s_signalRegion=s_sysprefix+"RegionHZee/SimpleJet1_phi"+s_sysprefix+"RegionHZee$";
-    else
-      s_signalRegion="BDTRegionHZee/SimpleJet1_phiBDTRegionHZee$";
   }
 
   RooRealVar *var;
@@ -109,13 +121,18 @@ class fitInfo{
   RooAddPdf *model;
   RooDataHist * h_data;
 
-  void create_variable( std::vector<std::string> &templateNames, std::vector<std::string> &fixedTemplateNames, std::vector<RooRealVar*>& f_vars, double min, double max ){
+  void create_variable( std::vector<std::string> &templateNames, std::vector<std::string> &fixedTemplateNames, std::vector<RooRealVar*>& f_vars, double min = -1e10, double max = 1e10 ){
 
+    std::cout << "Creating variables" << std::endl;
+
+    min = minVar;
+    max = maxVar;
     pdfList = new RooArgList;
     varList = new RooArgList;
-    var = new RooRealVar(("var"+s_region).c_str(),("var"+s_region).c_str(), min, max);
+    var = new RooRealVar(("var"+s_region+s_var).c_str(),("var"+s_region+s_var).c_str(), min, max);
     h_data = new RooDataHist(("data"+s_region).c_str(),("data"+s_region).c_str(), *var, hd );
 
+    std::cout << "creating varibles for fixed template..." << std::endl;
     for(int i=0; i<fixedTemplateNames.size(); ++i){
       std::cout << fixedTemplateNames.at(i) << " count = " << cr->count(fixedTemplateNames.at(i)) << ", signal count = " << cr_signal->count(fixedTemplateNames.at(i)) << std::endl;
       templates.push_back( new RooDataHist((s_region+"cr_"+fixedTemplateNames.at(i)).c_str(),(s_region+"cr_"+fixedTemplateNames.at(i)).c_str(), RooArgList(*var), cr->histo(fixedTemplateNames.at(i) )));
@@ -125,7 +142,7 @@ class fitInfo{
       pdfList->addOwned(*pdfs.at(i));
       varList->addOwned(*fit_vars.at(i));
     }
-    std::cout << "creating varibles for variable template" << std::endl;
+    std::cout << "creating varibles for variable template..." << std::endl;
     for(int i=0; i<templateNames.size(); ++i){
       int j = i+fixedTemplateNames.size();
       std::cout << templateNames.at(i) << " count = " << cr->count(templateNames.at(i)) << ", signal count = " << cr_signal->count(templateNames.at(i)) << std::endl;
@@ -139,7 +156,7 @@ class fitInfo{
 
     pdfList->Print();
     varList->Print();
-    model = new RooAddPdf( ("model_"+s_region).c_str(),("model_"+s_region).c_str(), *pdfList, *varList, kFALSE );
+    model = new RooAddPdf( ("model_"+s_region+s_var).c_str(),("model_"+s_region+s_var).c_str(), *pdfList, *varList, kFALSE );
   }
 
 
