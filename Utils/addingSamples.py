@@ -29,9 +29,13 @@ def getTotal( bin, fileList ):
     return total
     
 inc = []
+pt50To70 = []
 pt70To100 = []
+pt100 = []
 fileList = [ ['ZllH.Jun01.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball.root' , 2950., inc ] ,
-             ['ZllH.Jun01.DYJetsToLL_PtZ-70To100_TuneZ2star_8TeV-madgraph-tarball.root' , 52.31, pt70To100 ] ]
+             ['ZllH.Jun01.DYJetsToLL_PtZ-50To70_TuneZ2star_8TeV-madgraph-tarball.root' , 93.8, pt50To70 ], 
+             ['ZllH.Jun01.DYJetsToLL_PtZ-70To100_TuneZ2star_8TeV-madgraph-tarball.root' , 52.31, pt70To100 ], 
+             ['ZllH.Jun01.DYJetsToLL_PtZ-100_TuneZ2star_8TeV-madgraph-tarball.root' , 34.1, pt100 ] ]
 
 #look here https://www.evernote.com/shard/s186/sh/8ffc289c-ede2-4e09-83ba-1e1981f13617/4d5aac2f42a9fd480dc66f9303c1c217
 
