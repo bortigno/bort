@@ -27,25 +27,57 @@ def getTotal( bin, fileList ):
     return total
     
 inc = []
-pt50To70 = []
-pt70To100 = []
+j1 = []
+j2 = []
+j3 = []
+j4 = []
+pt5070 = []
+pt70100 = []
 pt100 = []
-fileList = [ ['ZllH.Jun15.DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball.root' , 2950., inc ] ,
-             ['ZllH.Jun15.DYJetsToLL_PtZ-50To70_TuneZ2star_8TeV-madgraph-tarball.root' , 93.8, pt50To70 ], 
-             ['ZllH.Jun15.DYJetsToLL_PtZ-70To100_TuneZ2star_8TeV-madgraph-tarball.root' , 52.31, pt70To100 ],
-             ['ZllH.Jun15.DYJetsToLL_PtZ-100_TuneZ2star_8TeV-madgraph.root' , 34.1, pt100 ] ]
+ht200400 = []
+ht400 = []
+
+prefix='DiJetPt_'
+fileList = [ [prefix+'DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball.root' , 2950.0, inc ] ,
+             [prefix+'DYJetsToLL_PtZ-50To70_TuneZ2star_8TeV-madgraph-tarball.root' , 93.8, pt5070 ],
+             [prefix+'DYJetsToLL_PtZ-70To100_TuneZ2star_8TeV-madgraph-tarball.root' , 52.31, pt70100 ],
+             [prefix+'DYJetsToLL_PtZ-100_TuneZ2star_8TeV-madgraph.root' , 34.1, pt100 ],
+             [prefix+'DY1JetsToLL_M-50_TuneZ2Star_8TeV-madgraph.root' , 561.0, j1 ] ,
+             [prefix+'DY2JetsToLL_M-50_TuneZ2Star_8TeV-madgraph.root' , 181.0, j2 ] ,
+#             [prefix+'DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph.root' , 51.1, j3 ] , # not ready in 53X
+             [prefix+'DY4JetsToLL_M-50_TuneZ2Star_8TeV-madgraph.root' , 23.04, j4 ] ]
 
 #look here https://www.evernote.com/shard/s186/sh/8ffc289c-ede2-4e09-83ba-1e1981f13617/4d5aac2f42a9fd480dc66f9303c1c217
 
-lheBin = ['lheV_pt < 50',
-          'lheV_pt > 50 & lheV_pt < 70',
-          'lheV_pt > 70 & lheV_pt < 100',
-          'lheV_pt > 100']
+lheBin = ['lheV_pt < 50 & lheNj == 0',
+          'lheV_pt > 50 & lheV_pt < 70 & lheNj == 0',
+          'lheV_pt > 70 & lheV_pt < 100 & lheNj == 0',
+          'lheV_pt > 100 & lheNj == 0',
+
+          'lheV_pt < 50 & lheNj == 1',
+          'lheV_pt > 50 & lheV_pt < 70 & lheNj == 1',
+          'lheV_pt > 70 & lheV_pt < 100 & lheNj == 1',
+          'lheV_pt > 100 & lheNj == 1',
+          
+          'lheV_pt < 50 & lheNj == 2',
+          'lheV_pt > 50 & lheV_pt < 70 & lheNj == 2',
+          'lheV_pt > 70 & lheV_pt < 100 & lheNj == 2',
+          'lheV_pt > 100 & lheNj == 2',
+          
+          'lheV_pt < 50 & lheNj == 3',
+          'lheV_pt > 50 & lheV_pt < 70 & lheNj == 3',
+          'lheV_pt > 70 & lheV_pt < 100 & lheNj == 3',
+          'lheV_pt > 100 & lheNj == 3',
+          
+          'lheV_pt < 50 & lheNj == 4',
+          'lheV_pt > 50 & lheV_pt < 70 & lheNj == 4',
+          'lheV_pt > 70 & lheV_pt < 100 & lheNj == 4',
+          'lheV_pt > 100 & lheNj == 4'          ]
 
 eventList = {}
 num = []
 for file in fileList:
-    print file[0]
+    print file
     infile = ROOT.TFile(file[0],"READ")
     tree = getObj(infile, 'tree')
     for bin in lheBin:
@@ -75,7 +107,7 @@ for bin in range(0, len(lheBin) ):
     print fileList
     if total[bin] > 0.:
         #the first is always the one with the highest N in the bin: 
-        weight.append( (fileList[0][1]/fileList[0][3]) * (CountIncl/2950.) * fileList[0][2][bin]/total[bin] )
+        weight.append( (fileList[0][1]/fileList[0][3]) * (CountIncl/2950.0) * fileList[0][2][bin]/total[bin] )
         print weight[bin]
     else:
         weight.append(1.)
@@ -97,14 +129,52 @@ for file in fileList:
     nEntries = tree.GetEntries()
     for entry in range(0,nEntries):
         tree.GetEntry(entry)
-        if tree.lheV_pt < 50:
+
+        if tree.lheV_pt < 50 and tree.lheNj == 0:
             lheWeight[0] = weight[0]
-        elif tree.lheV_pt > 50 and tree.lheV_pt < 70:
+        elif tree.lheV_pt > 50 and tree.lheV_pt < 70 and tree.lheNj == 0:
             lheWeight[0] = weight[1]
-        elif tree.lheV_pt > 70 and tree.lheV_pt < 100:
+        elif tree.lheV_pt > 70 and tree.lheV_pt < 100 and tree.lheNj == 0:
             lheWeight[0] = weight[2]
-        elif tree.lheV_pt > 100:
+        elif tree.lheV_pt > 100 and tree.lheNj == 0:
             lheWeight[0] = weight[3]
+
+        elif tree.lheV_pt < 50 and tree.lheNj == 1:
+            lheWeight[0] = weight[4]
+        elif tree.lheV_pt > 50 and tree.lheV_pt < 70 and tree.lheNj == 1:
+            lheWeight[0] = weight[5]
+        elif tree.lheV_pt > 70 and tree.lheV_pt < 100 and tree.lheNj == 1:
+            lheWeight[0] = weight[6]
+        elif tree.lheV_pt > 100 and tree.lheNj == 1:
+            lheWeight[0] = weight[7]
+
+        elif tree.lheV_pt < 50 and tree.lheNj == 2:
+            lheWeight[0] = weight[8]
+        elif tree.lheV_pt > 50 and tree.lheV_pt < 70 and tree.lheNj == 2:
+            lheWeight[0] = weight[9]
+        elif tree.lheV_pt > 70 and tree.lheV_pt < 100 and tree.lheNj == 2:
+            lheWeight[0] = weight[10]
+        elif tree.lheV_pt > 100 and tree.lheNj == 2:
+            lheWeight[0] = weight[11]
+
+        elif tree.lheV_pt < 50 and tree.lheNj == 3:
+            lheWeight[0] = weight[12]
+        elif tree.lheV_pt > 50 and tree.lheV_pt < 70 and tree.lheNj == 3:
+            lheWeight[0] = weight[13]
+        elif tree.lheV_pt > 70 and tree.lheV_pt < 100 and tree.lheNj == 3:
+            lheWeight[0] = weight[14]
+        elif tree.lheV_pt > 100 and tree.lheNj == 3:
+            lheWeight[0] = weight[15]
+            
+        elif tree.lheV_pt < 50 and tree.lheNj == 4:
+            lheWeight[0] = weight[16]
+        elif tree.lheV_pt > 50 and tree.lheV_pt < 70 and tree.lheNj == 4:
+            lheWeight[0] = weight[17]
+        elif tree.lheV_pt > 70 and tree.lheV_pt < 100 and tree.lheNj == 4:
+            lheWeight[0] = weight[18]
+        elif tree.lheV_pt > 100 and tree.lheNj == 4:
+            lheWeight[0] = weight[19]
+
         else:
             lheWeight[0] = 1.
 
