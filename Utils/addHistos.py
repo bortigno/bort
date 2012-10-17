@@ -43,7 +43,7 @@ def addHistos(args, moptions):
 #    p2 = h_in.find(".",p1+1)
 #    outfile = h_in.replace(h_in[p1+1:p2],h_in[p1+1:p2]+'Likelihood')
 #    outfile = outfile.split('/')
-    outfile = 'withHistos'+h_in
+    outfile = 'withHistos.'+t_in
     outfile = ROOT.TFile(outfile,"RECREATE")
 
     treeName = 'tree'
